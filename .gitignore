@@ -5,3 +5,5 @@
 !src/*
 !libs
 !libs/*
+!Docs
+!Docs/*
