@@ -9,6 +9,9 @@ public class main {
 
         Building b = Building.initialize (NUM_FLOORS, ELEVATOR_CAPACITY);
 
+        ElevatorControl controller = new ElevatorControl();
+        controller.start();
+
         Person [] people = new Person[NUM_PEOPLE];
         for (int i = 0; i < NUM_PEOPLE; i++) {
             people[i] = new Person();

@@ -16,5 +16,15 @@ public class Elevator {
         this.floor = 0;
     }
 
+    public double getPosition() {
+        return pos;
+    }
 
+    public int getFloor() {
+        return floor;
+    }
+
+    public boolean isDoorsOpen() {
+        return doorsOpen;
+    }
 }

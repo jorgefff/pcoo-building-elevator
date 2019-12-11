@@ -1,15 +1,13 @@
 public class ElevatorControl extends Thread {
 
-    protected int id;
-
-    public ElevatorControl (int id) {
-        this.id = id;
+    public ElevatorControl () {
     }
 
     @Override
     public void run() {
-        // Check requests
-        // Move elevator
+        // Cycle:
+        // - Check requests
+        // - Move elevator 1 unit
         // Open doors
         // Close doors
     }

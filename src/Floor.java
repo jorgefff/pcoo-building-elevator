@@ -3,10 +3,18 @@ import java.util.List;
 
 public class Floor {
 
+    protected Building building;
     protected List<Person> people;
+    protected int floor;
+    protected boolean buttonPressed;
 
-    public Floor() {
+    public Floor(int floor) {
+        assert floor >= 0;
+
+        this.floor = floor;
+        buttonPressed = false;
         people = new LinkedList<>();
+        building = Building.getInstance();
     }
 
     public void enter (Person p) {
@@ -26,7 +34,7 @@ public class Floor {
     }
 
 
-    public int getPeopleCounter() {
+    public int getOccupancy() {
         return people.size();
     }
 
@@ -36,10 +44,14 @@ public class Floor {
         assert people != null;
         assert people.contains(p);
 
+        if (!buttonPressed) {
+            buttonPressed = true;
+            // Persistent message to elevator control
+        }
     }
 
 
-    public void enterElevatorQueue(Person p) {
+    public void enterElevatorQueue (Person p) {
         assert p != null;
         assert people != null;
         assert people.contains(p);
