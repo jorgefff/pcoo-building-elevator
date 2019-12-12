@@ -1,23 +1,36 @@
+import static java.lang.System.*;
 
 public class main {
 
     private final static int NUM_FLOORS = 10;
-    private final static int ELEVATOR_CAPACITY = 10;
+    private final static int ELEVATOR_CAPACITY = 4;
     private final static int NUM_PEOPLE = 1;
 
     public static void main(String[] args) {
 
-        Building b = Building.initialize (NUM_FLOORS, ELEVATOR_CAPACITY);
+        // Initialize shared area - floors
+        Floor[] floors = new Floor[NUM_FLOORS];
+        for (int i = 0; i < floors.length; i ++) {
+            floors[i] = new Floor(i);
+        }
 
-        ElevatorControl controller = new ElevatorControl();
-        controller.start();
+        // Initialize shared area - elevator
+        Elevator elevator = new Elevator(ELEVATOR_CAPACITY);
 
+        // Initialize shared area - building
+        Building building = new Building(floors, elevator);
+
+        // Initialize active entity - elevator controller
+        ElevatorControl controller = new ElevatorControl(building);
+
+        // Initialize active entity - person
         Person [] people = new Person[NUM_PEOPLE];
         for (int i = 0; i < NUM_PEOPLE; i++) {
-            people[i] = new Person();
+            people[i] = new Person(building);
             people[i].start();
         }
 
+        // Wait for every person to finish
         for (int i = 0; i < NUM_PEOPLE; i++) {
             try {
                 people[i].join();

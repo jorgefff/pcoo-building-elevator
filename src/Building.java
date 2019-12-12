@@ -1,38 +1,20 @@
 
 public class Building {
 
-    protected static Building instance = null;
-
     protected Floor[] floors;
     protected Elevator elevator;
 
     protected int numFloors;
     protected int elevatorCap;
 
-    private Building (int numFloors, int elevatorCapacity) {
-        assert numFloors > 0;
-        assert elevatorCapacity > 0;
 
-        floors = new Floor[numFloors];
-        for (int i = 0; i < numFloors; i++) {
-            floors[i] = new Floor(i);
-        }
-
-        elevator = new Elevator (elevatorCapacity);
-
-        this.numFloors = numFloors;
-        this.elevatorCap = elevatorCapacity;
-    }
-
-    public static Building initialize (int numFloors, int elevatorCapacity) {
-        assert instance == null;
-        instance = new Building (numFloors, elevatorCapacity);
-        return instance;
-    }
-
-    public static Building getInstance() {
-        assert instance != null;
-        return instance;
+    public Building (Floor[] floors, Elevator elevator) {
+        assert floors != null;
+        assert elevator != null;
+        this.floors = floors;
+        this.numFloors = floors.length;
+        this.elevator = elevator;
+        this.elevatorCap = elevator.getCapacity();
     }
 
     public int getNumFloors() {
@@ -50,12 +32,23 @@ public class Building {
 
     public int[] getAllOccupancies() {
         assert floors != null;
+
         int[] occupancy = new int[numFloors];
 
         for (int i = 0; i < numFloors; i++) {
             occupancy[i] = floors[i].getOccupancy();
         }
         return occupancy;
+    }
+
+    public double getElevatorPos() {
+        assert elevator != null;
+        return elevator.getPosition();
+    }
+
+    public int getElevatorFloor() {
+        assert elevator != null;
+        return elevator.getFloor();
     }
 
     public Floor enterFloor (Person p, int n) {

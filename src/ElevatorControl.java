@@ -1,6 +1,9 @@
 public class ElevatorControl extends Thread {
 
-    public ElevatorControl () {
+    protected Building building;
+
+    public ElevatorControl(Building building) {
+        this.building = building;
     }
 
     @Override

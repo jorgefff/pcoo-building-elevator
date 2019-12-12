@@ -9,8 +9,10 @@ public class Person extends Thread {
     protected int goal;
     protected Building building;
 
-    public Person () {
-        building = Building.getInstance();
+    public Person (Building building) {
+        assert building != null;
+
+        this.building = building;
         start = randFloor (building.getNumFloors());
         do {
             goal = randFloor (building.getNumFloors());
@@ -19,11 +21,7 @@ public class Person extends Thread {
 
     @Override
     public String toString() {
-        String person =
-                "PERSON-" +
-                "START("+start+")-" +
-                "GOAL("+goal+")";
-        return person;
+        return "PERSON-START( "+start+" )-GOAL( "+goal+" )";
     }
 
     private int randFloor (int max) {
@@ -46,8 +44,19 @@ public class Person extends Thread {
 
     @Override
     public void run() {
+
         randStartSleep();
+
         out.println(this);
+
         Floor floor = building.enterFloor(this, start);
+
+
+
+        // Check if elevator door is already open
+        // Try enter
+        // If entered, exit floor
+
+
     }
 }

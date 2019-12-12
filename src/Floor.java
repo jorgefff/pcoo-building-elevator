@@ -1,20 +1,30 @@
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+
+import pt.ua.concurrent.Mutex;
+import pt.ua.concurrent.MutexCV;
 
 public class Floor {
 
-    protected Building building;
-    protected List<Person> people;
-    protected int floor;
-    protected boolean buttonPressed;
+    protected List<Person> people;      // List of people in this floor
+    protected Queue<Person> queue;      // Queue to enter the elevator
 
-    public Floor(int floor) {
-        assert floor >= 0;
+    protected int floorNum;             // Floor number
 
-        this.floor = floor;
+    protected boolean buttonPressed;    // Button to call elevator
+
+    protected final Mutex floorMtx;
+
+    public Floor(int floorNum) {
+        assert floorNum >= 0;
+
+        this.floorNum = floorNum;
         buttonPressed = false;
         people = new LinkedList<>();
-        building = Building.getInstance();
+        queue = new LinkedList<>();
+
+        floorMtx = new Mutex(true);
     }
 
     public void enter (Person p) {
@@ -22,7 +32,11 @@ public class Floor {
         assert people != null;
         assert !people.contains(p);
 
+        floorMtx.lock();
         people.add(p);
+        floorMtx.unlock();
+
+        assert people.contains(p);
     }
 
     public void exit (Person p) {
@@ -30,7 +44,11 @@ public class Floor {
         assert people != null;
         assert people.contains(p);
 
+        floorMtx.lock();
         people.remove(p);
+        floorMtx.unlock();
+
+        assert !people.contains(p);
     }
 
 
@@ -44,17 +62,18 @@ public class Floor {
         assert people != null;
         assert people.contains(p);
 
-        if (!buttonPressed) {
-            buttonPressed = true;
-            // Persistent message to elevator control
-        }
+        buttonPressed = true;
     }
-
 
     public void enterElevatorQueue (Person p) {
         assert p != null;
         assert people != null;
         assert people.contains(p);
+        assert !queue.contains(p);
 
+        queue.add(p);
+
+        assert !queue.contains(p);
     }
+
 }
