@@ -1,10 +1,13 @@
+import java.util.LinkedList;
+import java.util.List;
+
 import static java.lang.System.*;
 
 public class main {
 
     private final static int NUM_FLOORS = 10;
     private final static int ELEVATOR_CAPACITY = 4;
-    private final static int NUM_PEOPLE = 1;
+    private final static int NUM_PEOPLE = 2;
 
     public static void main(String[] args) {
 
@@ -15,13 +18,14 @@ public class main {
         }
 
         // Initialize shared area - elevator
-        Elevator elevator = new Elevator(ELEVATOR_CAPACITY);
+        Elevator elevator = new Elevator(ELEVATOR_CAPACITY, NUM_FLOORS);
 
         // Initialize shared area - building
         Building building = new Building(floors, elevator);
 
         // Initialize active entity - elevator controller
         ElevatorControl controller = new ElevatorControl(building);
+        controller.start();
 
         // Initialize active entity - person
         Person [] people = new Person[NUM_PEOPLE];

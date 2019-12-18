@@ -17,6 +17,8 @@ public class Person extends Thread {
         do {
             goal = randFloor (building.getNumFloors());
         } while (goal == start);
+        start = 0;  //DEBUG
+        goal = 10;  //DEBUG
     }
 
     @Override
@@ -51,12 +53,8 @@ public class Person extends Thread {
 
         Floor floor = building.enterFloor(this, start);
 
+        floor.callElevator(this);
 
-
-        // Check if elevator door is already open
-        // Try enter
-        // If entered, exit floor
-
-
+        building.getElevator().enter(this);
     }
 }
