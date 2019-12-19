@@ -14,7 +14,6 @@ public class Floor {
 
     protected final Mutex floorMtx;
     protected final MutexCV floorCV;
-    protected final Mutex buttonMtx;
 
     public Floor(int floorNum) {
         assert floorNum >= 0;
@@ -25,7 +24,6 @@ public class Floor {
         this.queue = new LinkedList<>();
         this.floorMtx = new Mutex(true);
         this.floorCV = floorMtx.newCV();
-        this.buttonMtx = new Mutex(true);
     }
 
     public void enter (Person p) {
@@ -54,6 +52,8 @@ public class Floor {
 
 
     public int getOccupancy() {
+        assert people != null;
+
         return people.size();
     }
 
@@ -62,23 +62,11 @@ public class Floor {
         return people;
     }
 
-    public boolean requestingElevator() {
-        return elevatorRequested;
+    public boolean contains(Person p) {
+        return people.contains(p);
     }
 
     public int getFloorNum() {
         return floorNum;
-    }
-
-    public void callElevator(Person p) {
-        assert p != null;
-        assert people != null;
-        assert people.contains(p);
-
-        elevatorRequested = true;
-    }
-
-    public void resetRequest() {
-        elevatorRequested = false;
     }
 }
