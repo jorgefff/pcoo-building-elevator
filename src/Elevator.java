@@ -12,7 +12,7 @@ public class Elevator {
     protected int numFloors;
     protected boolean moving;
     protected List<Person> peopleInside;
-    protected boolean[] buttonsPressed;
+    protected Request[] requests;
 
 
     public Elevator (int capacity, int numFloors) {
@@ -25,8 +25,7 @@ public class Elevator {
         this.moving = false;
         this.peopleInside = new LinkedList<>();
         this.numFloors = numFloors;
-        this.buttonsPressed = new boolean[numFloors];
-        for (boolean b : buttonsPressed) { b = false; }
+        this.requests = new Request[numFloors];
     }
 
     @Override
@@ -110,12 +109,35 @@ public class Elevator {
         assert floorN == p.goal;
 
         peopleInside.remove(p);
-        buttonsPressed[floorN] = false;
+        requests[floorN] = null;
     }
 
     public boolean isFloorRequesting(int n) {
-        assert buttonsPressed != null;
+        assert requests != null;
 
-        return buttonsPressed[n];
+        return requests[n] != null;
+    }
+
+    public boolean pendingRequests() {
+        assert requests != null;
+        for (Request req : requests) {
+            if (req != null) { return true; }
+        }
+        return false;
+    }
+
+    public Request getNextDestination() {
+        assert pendingRequests();
+
+        Request req = new Request(numFloors);
+
+        for (int i = 0; i < numFloors; i++) {
+            Request newReq = requests[i];
+            if (newReq == null) { continue; }
+            if ( req.timestamp > newReq.timestamp) {
+                req = newReq;
+            }
+        }
+        return req;
     }
 }

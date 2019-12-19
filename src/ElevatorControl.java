@@ -38,13 +38,15 @@ public class ElevatorControl extends Thread {
             boolean isFull = elevator.isFull();
             boolean floorRequesting = atAFloor && building.pendingRequest(currFloorN);
             boolean arrived = elevator.atFloor(destination);
-            boolean pendingReqs = building.pendingRequests();
+            boolean pendingEReqs = elevator.pendingRequests();
+            boolean pendingBReqs = building.pendingRequests();
+            boolean pendingReqs = pendingBReqs || pendingEReqs;
 
             // Decide what to do
             Actions task;
             if (    (isMoving && elevatorReq) ||
                     (isMoving && floorRequesting && !isFull)) {
-//                out.println("STOP");
+                out.println("STOP");
 //                out.println("isMoving:"+isMoving);
 //                out.println("elevatorReq:"+elevatorReq);
 //                out.println("floorRequesting:"+floorRequesting);
@@ -85,7 +87,18 @@ public class ElevatorControl extends Thread {
                     building.elevatorIdle();
                     break;
                 case NEW_DESTINATION:
-                    destination = building.getNextDestination();
+                    Request req = null;
+                    Request breq = null;
+                    if (pendingEReqs) {
+                        req = elevator.getNextDestination();
+                    }
+                    if (pendingBReqs) {
+                        breq = building.getNextDestination();
+                        if (req == null || req.timestamp > breq.timestamp) {
+                            req = breq;
+                        }
+                    }
+                    destination = req.floor;
                     if (destination > currFloorN)   { direction = 1; }
                     else                            { direction = -1; }
                     out.println("-->"+destination);

@@ -8,7 +8,7 @@ public class Building {
 
     protected Floor[] floors;
     protected Elevator elevator;
-    protected Long[] requests;
+    protected Request[] requests;
     protected int numFloors;
     protected int elevatorCap;
 
@@ -25,8 +25,7 @@ public class Building {
         this.numFloors = floors.length;
         this.elevator = elevator;
         this.elevatorCap = elevator.getCapacity();
-        this.requests = new Long[numFloors];
-        for (Long r : requests) { r = null; }
+        this.requests = new Request[numFloors];
 
         this.elevatorRequests = new Mutex(true);
         this.elevatorIdleCV = elevatorRequests.newCV();
@@ -131,7 +130,7 @@ public class Building {
 
         elevatorRequests.lock();
         if (requests[p.start] == null) {
-            requests[p.start] = System.currentTimeMillis();
+            requests[p.start] = new Request(p.start);
             elevatorIdleCV.broadcast();
         }
         elevatorRequests.unlock();
@@ -143,11 +142,10 @@ public class Building {
         assert floors[p.start].contains(p);
         assert elevatorDoor[p.start].lockIsMine();
 
-        while (!elevator.atFloor(p.start) && !elevator.isMoving()) {
+        while (!elevator.atFloor(p.start) || !elevator.isMoving()) {
             elevatorQueueCV[p.start].await();
         }
 
-        for(Floor f : floors) { out.print(" F:"+f.getOccupancy()); }
         floors[p.start].exit(p);
         elevator.enter(p);
 
@@ -161,14 +159,15 @@ public class Building {
     }
 
     public void resetRequest(int n) {
-        assert floors != null;
-        assert floors[n] != null;
+        assert n >= 0 && n < numFloors;
+        assert requests != null;
+        assert requests[n] != null;
 
-        floors[n] = null;
+        requests[n] = null;
     }
 
     public boolean pendingRequests() {
-        for (Long r : requests) {
+        for (Request r : requests) {
             if (r != null) { return true; }
         }
         return false;
@@ -180,25 +179,19 @@ public class Building {
         return requests[n] != null;
     }
 
-    public int getNextDestination() {
+    public Request getNextDestination() {
         assert pendingRequests();
 
-        int floor = 0;
-        Long timestamp = null;
-
+        Request req = new Request(numFloors);
 
         for (int i = 0; i < numFloors; i++) {
-            Long newTime = requests[i];
-            if (newTime == null) { continue; }
-            if (timestamp == null || timestamp > newTime) {
-                floor = i;
-                timestamp = newTime;
+            Request newReq = requests[i];
+            if (newReq == null) { continue; }
+            if ( req.timestamp > newReq.timestamp) {
+                req = newReq;
             }
         }
-
-        //TODO: lock?
-        requests[floor] = null;
-        return floor;
+        return req;
     }
 
     public void grabDoor(Person p) {
