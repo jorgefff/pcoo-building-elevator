@@ -46,7 +46,7 @@ public class Person extends Thread {
 
     @Override
     public void run() {
-
+        Elevator elevator;
         randStartSleep();
 
         out.println(this);
@@ -57,14 +57,12 @@ public class Person extends Thread {
 
         building.grabDoor(this);
 
-        Elevator elevator = building.queueForElevator(this);
-
+        elevator = building.queueForElevator(this);
+        floor.exit(this);
+        elevator.enter(this);
+        elevator.newRequest(new Request(goal));
         building.releaseDoor(this);
-
-//        elevator.waitForMyFloor(this);
-
-
-        //building.enterFloor(this, goal);
+        elevator.waitForMyFloor(this);
 
     }
 }

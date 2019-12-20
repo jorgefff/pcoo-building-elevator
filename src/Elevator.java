@@ -1,3 +1,7 @@
+import static java.lang.System.*;
+import pt.ua.concurrent.Mutex;
+import pt.ua.concurrent.MutexCV;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,8 +16,10 @@ public class Elevator {
     protected int numFloors;
     protected boolean moving;
     protected List<Person> peopleInside;
+    protected Mutex peopleLock;
     protected Request[] requests;
-
+    protected Mutex requestsLock;
+    protected MutexCV idleController;
 
     public Elevator (int capacity, int numFloors) {
         assert capacity > 0;
@@ -25,8 +31,23 @@ public class Elevator {
         this.moving = false;
         this.peopleInside = new LinkedList<>();
         this.numFloors = numFloors;
+        this.peopleLock = new Mutex(true);
         this.requests = new Request[numFloors];
+        this.requestsLock = new Mutex(true);
+        this.idleController = requestsLock.newCV();
     }
+
+    /* **********************************************************************************************************
+     * Common methods
+     */
+
+    /* **********************************************************************************************************
+     * Person methods
+     */
+
+    /* **********************************************************************************************************
+     * ElevatorControl methods
+     */
 
     @Override
     public String toString() {
@@ -98,7 +119,9 @@ public class Elevator {
         assert !peopleInside.contains(p);
         assert peopleInside.size() < capacity;
 
+        peopleLock.lock();
         peopleInside.add(p);
+        peopleLock.unlock();
     }
 
     public void exit (Person p) {
@@ -108,8 +131,29 @@ public class Elevator {
         assert peopleInside.contains(p);
         assert floorN == p.goal;
 
+        peopleLock.lock();
         peopleInside.remove(p);
-        requests[floorN] = null;
+        peopleLock.unlock();
+    }
+
+    public void waitForMyFloor(Person p) {
+        assert p != null;
+        assert peopleInside.contains(p);
+
+        //TODO
+    }
+
+    public void newRequest(Request r) {
+        assert r != null;
+        assert r.floor >= 0 && r.floor < numFloors;
+        assert requests != null;
+
+        requestsLock.lock();
+        if (requests[r.floor] == null) {
+            requests[r.floor] = r;
+            idleController.broadcast();
+        }
+        requestsLock.unlock();
     }
 
     public boolean isFloorRequesting(int n) {
@@ -126,10 +170,17 @@ public class Elevator {
         return false;
     }
 
+    public boolean pendingRequest(int n) {
+        assert n >= 0 && n < numFloors;
+        assert requests != null;
+
+        return requests[n] != null;
+    }
+
     public Request getNextDestination() {
         assert pendingRequests();
 
-        Request req = new Request(numFloors);
+        Request req = new Request(numFloors, "elevator");
 
         for (int i = 0; i < numFloors; i++) {
             Request newReq = requests[i];
@@ -139,5 +190,20 @@ public class Elevator {
             }
         }
         return req;
+    }
+
+    public void clearRequest(int n) {
+        assert n >= 0 && n < numFloors;
+        assert requests != null;
+
+        requests[n] = null;
+    }
+
+    public void idleController() {
+        requestsLock.lock();
+        while (!pendingRequests()) {
+            idleController.await();
+        }
+        requestsLock.unlock();
     }
 }

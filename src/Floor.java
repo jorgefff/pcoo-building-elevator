@@ -7,10 +7,8 @@ import pt.ua.concurrent.MutexCV;
 
 public class Floor {
 
-    protected List<Person> people;      // List of people in this floor
-    protected Queue<Person> queue;      // Queue to enter the elevator
-    protected int floorNum;             // Floor number
-    protected boolean elevatorRequested;    // Button to call elevator
+    protected List<Person> people;          // List of people in this floor
+    protected int floorNum;                 // Floor number
 
     protected final Mutex floorMtx;
     protected final MutexCV floorCV;
@@ -19,9 +17,7 @@ public class Floor {
         assert floorNum >= 0;
 
         this.floorNum = floorNum;
-        this.elevatorRequested = false;
         this.people = new LinkedList<>();
-        this.queue = new LinkedList<>();
         this.floorMtx = new Mutex(true);
         this.floorCV = floorMtx.newCV();
     }
@@ -50,23 +46,14 @@ public class Floor {
         assert !people.contains(p);
     }
 
-
     public int getOccupancy() {
         assert people != null;
 
         return people.size();
     }
 
-    public List<Person> getPeople() {
-        assert people != null;
-        return people;
-    }
-
     public boolean contains(Person p) {
         return people.contains(p);
     }
 
-    public int getFloorNum() {
-        return floorNum;
-    }
 }

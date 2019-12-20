@@ -2,15 +2,15 @@ import static java.lang.System.*;
 
 public class ElevatorControl extends Thread {
 
-    protected Building building;
+    protected Building building; // TODO: trocar para Building_Ctrl
     protected Elevator elevator;
-    protected int destination;
+    protected Request destination;
     protected int direction;
 
     public ElevatorControl(Building building) {
         this.building = building;
         this.elevator = building.getElevator();
-        this.destination = elevator.getFloorN();
+        this.destination = new Request(elevator.floorN);
         this.direction = 0;
     }
 
@@ -34,25 +34,15 @@ public class ElevatorControl extends Thread {
             int currFloorN = elevator.getFloorN();
             boolean atAFloor = elevator.atAFloor();
             boolean isMoving = elevator.isMoving();
-            boolean elevatorReq = elevator.isFloorRequesting(currFloorN);
             boolean isFull = elevator.isFull();
-            boolean floorRequesting = atAFloor && building.pendingRequest(currFloorN);
-            boolean arrived = elevator.atFloor(destination);
-            boolean pendingEReqs = elevator.pendingRequests();
-            boolean pendingBReqs = building.pendingRequests();
-            boolean pendingReqs = pendingBReqs || pendingEReqs;
+            boolean requesting = atAFloor && elevator.pendingRequest(currFloorN);
+            boolean arrived = elevator.atFloor(destination.floor);
+            boolean pendingReqs = elevator.pendingRequests();
 
             // Decide what to do
             Actions task;
-            if (    (isMoving && elevatorReq) ||
-                    (isMoving && floorRequesting && !isFull)) {
+            if (isMoving && requesting && !isFull) {
                 out.println("STOP");
-//                out.println("isMoving:"+isMoving);
-//                out.println("elevatorReq:"+elevatorReq);
-//                out.println("floorRequesting:"+floorRequesting);
-//                out.println("isFull:"+isFull);
-//                out.println("CurrFloor:"+currFloorN);
-//                for (Long r : building.requests) { out.print(" F:"+r); }
                 task = Actions.STOP;
             }
             else if (!isMoving && arrived && pendingReqs) {
@@ -78,33 +68,24 @@ public class ElevatorControl extends Thread {
                     }
                     elevator.move(direction);
                     break;
+
                 case STOP:
                     elevator.stopMoving();
-                    building.openDoors(currFloorN);
-                    building.resetRequest(currFloorN);
+                    building.unlockDoors(currFloorN);
+                    elevator.clearRequest(currFloorN);
                     break;
+
                 case IDLE:
-                    building.elevatorIdle();
+                    elevator.idleController();
                     break;
+
                 case NEW_DESTINATION:
-                    Request req = null;
-                    Request breq = null;
-                    if (pendingEReqs) {
-                        req = elevator.getNextDestination();
-                    }
-                    if (pendingBReqs) {
-                        breq = building.getNextDestination();
-                        if (req == null || req.timestamp > breq.timestamp) {
-                            req = breq;
-                        }
-                    }
-                    destination = req.floor;
-                    if (destination > currFloorN)   { direction = 1; }
-                    else                            { direction = -1; }
-                    out.println("-->"+destination);
+                    destination = elevator.getNextDestination();
+                    if (destination.floor > currFloorN) { direction = 1; }
+                    else                                { direction = -1; }
+                    out.println("-->"+destination.floor);
                     break;
             }
-
             pause();
         }
     }

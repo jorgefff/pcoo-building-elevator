@@ -8,12 +8,10 @@ public class Building {
 
     protected Floor[] floors;
     protected Elevator elevator;
-    protected Request[] requests;
     protected int numFloors;
     protected int elevatorCap;
 
     protected final Mutex elevatorRequests;
-    protected final MutexCV elevatorIdleCV;
     protected final Mutex[] elevatorDoor;          // Elevator queue for each floor
     protected final MutexCV[] elevatorQueueCV;
 
@@ -25,10 +23,8 @@ public class Building {
         this.numFloors = floors.length;
         this.elevator = elevator;
         this.elevatorCap = elevator.getCapacity();
-        this.requests = new Request[numFloors];
 
         this.elevatorRequests = new Mutex(true);
-        this.elevatorIdleCV = elevatorRequests.newCV();
         this.elevatorDoor = new Mutex[numFloors];
         this.elevatorQueueCV = new MutexCV[numFloors];
         for(int i = 0; i < numFloors; i++)
@@ -37,6 +33,10 @@ public class Building {
             elevatorQueueCV[i] = elevatorDoor[i].newCV();
         }
     }
+
+    /* **********************************************************************************************************
+     * Common methods
+     */
 
     @Override
     public String toString() {
@@ -54,18 +54,6 @@ public class Building {
 
     public int getNumFloors() {
         return numFloors;
-    }
-
-    public Floor getFloor(int n) {
-        assert floors != null;
-
-        return floors[n];
-    }
-
-    public Floor[] getFloors() {
-        assert floors != null;
-
-        return floors;
     }
 
     public Elevator getElevator() {
@@ -94,6 +82,18 @@ public class Building {
         return occupancy;
     }
 
+    public Floor getFloor(int n) {
+        assert floors != null;
+
+        return floors[n];
+    }
+
+    public Floor[] getFloors() {
+        assert floors != null;
+
+        return floors;
+    }
+
     public double getElevatorPos() {
         assert elevator != null;
         return elevator.getPosition();
@@ -104,13 +104,9 @@ public class Building {
         return elevator.getFloorN();
     }
 
-    public void elevatorIdle() {
-        elevatorRequests.lock();
-        while (!pendingRequests()) {
-            elevatorIdleCV.await();
-        }
-        elevatorRequests.unlock();
-    }
+    /* **********************************************************************************************************
+     * Person methods
+     */
 
     public Floor enterFloor (Person p, int n) {
         assert n >= 0 && n < numFloors;
@@ -128,12 +124,8 @@ public class Building {
         assert floors[p.start] != null;
         assert floors[p.start].contains(p);;
 
-        elevatorRequests.lock();
-        if (requests[p.start] == null) {
-            requests[p.start] = new Request(p.start);
-            elevatorIdleCV.broadcast();
-        }
-        elevatorRequests.unlock();
+        Request request = new Request(p.start, "building");
+        elevator.newRequest(request);
     }
 
     public Elevator queueForElevator (Person p) {
@@ -142,56 +134,11 @@ public class Building {
         assert floors[p.start].contains(p);
         assert elevatorDoor[p.start].lockIsMine();
 
-        while (!elevator.atFloor(p.start) || !elevator.isMoving()) {
+        while (!elevator.atFloor(p.start) || elevator.isMoving()) {
             elevatorQueueCV[p.start].await();
         }
 
-        floors[p.start].exit(p);
-        elevator.enter(p);
-
         return elevator;
-    }
-
-    public void openDoors(int n) {
-        elevatorDoor[n].lock();
-        elevatorQueueCV[n].broadcast();
-        elevatorDoor[n].unlock();
-    }
-
-    public void resetRequest(int n) {
-        assert n >= 0 && n < numFloors;
-        assert requests != null;
-        assert requests[n] != null;
-
-        requests[n] = null;
-    }
-
-    public boolean pendingRequests() {
-        for (Request r : requests) {
-            if (r != null) { return true; }
-        }
-        return false;
-    }
-
-    public boolean pendingRequest(int n) {
-        assert floors != null;
-
-        return requests[n] != null;
-    }
-
-    public Request getNextDestination() {
-        assert pendingRequests();
-
-        Request req = new Request(numFloors);
-
-        for (int i = 0; i < numFloors; i++) {
-            Request newReq = requests[i];
-            if (newReq == null) { continue; }
-            if ( req.timestamp > newReq.timestamp) {
-                req = newReq;
-            }
-        }
-        return req;
     }
 
     public void grabDoor(Person p) {
@@ -208,6 +155,17 @@ public class Building {
 
         elevatorDoor[p.start].unlock();
     }
+
+    /* **********************************************************************************************************
+     * ElevatorControl methods
+     */
+
+    public void unlockDoors(int n) {
+        elevatorDoor[n].lock();
+        elevatorQueueCV[n].broadcast();
+        elevatorDoor[n].unlock();
+    }
+
 
     public void grabDoor(int n) {
         assert n >= 0 && n < numFloors;
