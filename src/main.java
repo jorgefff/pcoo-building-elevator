@@ -6,23 +6,18 @@ import static java.lang.System.*;
 
 public class main {
 
-    private final static int NUM_FLOORS = 10;
+    private final static int NUM_FLOORS = 5;
     private final static int ELEVATOR_CAPACITY = 4;
-    private final static int NUM_PEOPLE = 2;
+    private final static int NUM_PEOPLE = 20;
 
     public static void main(String[] args) {
-
-        // Initialize shared area - floors
-        Floor[] floors = new Floor[NUM_FLOORS];
-        for (int i = 0; i < floors.length; i ++) {
-            floors[i] = new Floor(i);
-        }
 
         // Initialize shared area - elevator
         Elevator elevator = new Elevator(ELEVATOR_CAPACITY, NUM_FLOORS);
 
-        // Initialize shared area - building
-        Building building = new Building(floors, elevator);
+        // Initialize shared area - building and its floors
+        Building building = new Building(NUM_FLOORS, elevator);
+        building.generateFloors();
 
         // Initialize active entity - elevator controller
         ElevatorControl controller = new ElevatorControl(building);
@@ -44,5 +39,12 @@ public class main {
                 System.exit(1);
             }
         }
+        try {
+            controller.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
     }
 }

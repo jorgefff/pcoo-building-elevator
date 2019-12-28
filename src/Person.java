@@ -17,8 +17,8 @@ public class Person extends Thread {
         do {
             goal = randFloor (building.getNumFloors());
         } while (goal == start);
-        start = 2;  //DEBUG
-        goal = 0;  //DEBUG
+//        start = 2;  //DEBUG
+//        goal = 0;  //DEBUG
     }
 
     @Override
@@ -45,24 +45,22 @@ public class Person extends Thread {
     }
 
     @Override
-    public void run() {
-        Elevator elevator;
+    public void run() { //TODO: convert to thread pool
         randStartSleep();
-
+        Floor floor;
+        Elevator elevator;
         out.println(this);
 
-        Floor floor = building.enterFloor(this, start);
+        // Enter floor (start)
+        // Call elevator
+        // Enter elevator (if not full)
+        // Exit when the floor (goal) is reached
 
-        building.callElevator(this);
-
-        building.grabDoor(this);
-
-        elevator = building.queueForElevator(this);
+        floor = building.enterFloor(this, start);
+        floor.callElevator(this);
+        elevator = floor.queueForElevator(this);
         floor.exit(this);
         elevator.enter(this);
-        elevator.newRequest(new Request(goal));
-        building.releaseDoor(this);
-        elevator.waitForMyFloor(this);
-
+        floor.releaseElevatorDoor();
     }
 }

@@ -10,7 +10,7 @@ public class ElevatorControl extends Thread {
     public ElevatorControl(Building building) {
         this.building = building;
         this.elevator = building.getElevator();
-        this.destination = new Request(elevator.floorN);
+        this.destination = null;
         this.direction = 0;
     }
 
@@ -28,69 +28,32 @@ public class ElevatorControl extends Thread {
     @Override
     public void run() {
         while (true) {
-            out.println("\n\n\n\n"+building);
-
             // Check current state of elevator
             int currFloorN = elevator.getFloorN();
-            boolean atAFloor = elevator.atAFloor();
-            boolean isMoving = elevator.isMoving();
-            boolean isFull = elevator.isFull();
-            boolean requesting = atAFloor && elevator.pendingRequest(currFloorN);
-            boolean arrived = elevator.atFloor(destination.floor);
-            boolean pendingReqs = elevator.pendingRequests();
 
             // Decide what to do
-            Actions task;
-            if (isMoving && requesting && !isFull) {
-                out.println("STOP");
-                task = Actions.STOP;
-            }
-            else if (!isMoving && arrived && pendingReqs) {
-                out.println("NEW_DESTINATION");
-                task = Actions.NEW_DESTINATION;
-            }
-            else if (pendingReqs) {
-                out.println("MOVE");
-                task = Actions.MOVE;
-            }
-            else {
-                out.println("IDLE");
-                task = Actions.IDLE;
-            }
-
+            Actions task = Actions.IDLE;
 
             switch (task) {
                 case MOVE:
-                    if (!isMoving) {
-                        building.grabDoor(currFloorN);
-                        elevator.startMoving();
-                        building.releaseDoor(currFloorN);
-                    }
-                    elevator.move(direction);
                     break;
 
                 case STOP:
-                    elevator.stopMoving();
-                    building.unlockDoors(currFloorN);
-                    elevator.clearRequest(currFloorN);
                     break;
 
                 case IDLE:
-                    elevator.idleController();
                     break;
 
                 case NEW_DESTINATION:
-                    destination = elevator.getNextDestination();
-                    if (destination.floor > currFloorN) { direction = 1; }
-                    else                                { direction = -1; }
-                    out.println("-->"+destination.floor);
                     break;
             }
+            out.println("\n\n\n\n"+building);
             pause();
         }
     }
 
     private enum Actions {
+        ARRIVED,
         NEW_DESTINATION,
         MOVE,
         STOP,
