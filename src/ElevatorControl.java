@@ -29,6 +29,7 @@ public class ElevatorControl extends Thread {
     public void run() {
         State currState = State.IDLE;
         State nextState = State.IDLE;
+
         for(;;currState = nextState) {
             // Update info
             int currFloorN = elevator.getFloorN();
@@ -36,6 +37,7 @@ public class ElevatorControl extends Thread {
             boolean isRequesting = building.isRequesting(currFloorN);
             boolean isAtAFloor = elevator.isAtAFloor();
             boolean arrived = destination != null && elevator.isAtFloor(destination.floor);
+            boolean startedMovement = elevator.startedMovement();
 
             out.println("\n\n\n\n"+building);
 
@@ -46,8 +48,9 @@ public class ElevatorControl extends Thread {
                     break;
 
                 case MOVING:
-                    if (isRequesting && isAtAFloor) {
+                    if (isRequesting && isAtAFloor && !startedMovement) {
                         elevator.stopMoving();
+                        building.clearRequests(currFloorN);
                         currFloor.openDoors();
                         nextState = State.STOPPED; out.println("MOVING -> STOP");
                         break;
@@ -56,7 +59,6 @@ public class ElevatorControl extends Thread {
                     break;
 
                 case STOPPED:
-                    building.clearRequests(currFloorN);
                     if (!arrived) {
                         currFloor.grabElevatorDoor();
                         elevator.startMoving();

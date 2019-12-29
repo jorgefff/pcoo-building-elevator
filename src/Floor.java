@@ -66,6 +66,7 @@ public class Floor {
         elevatorDoorMtx.lock();
         Elevator ele = building.getElevator();
         while (!ele.isAtFloor(floorNum) || ele.isMoving() || ele.isFull()) {
+            callElevator(p);
             waitingForElevator.await();
         }
         return ele;

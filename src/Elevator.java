@@ -15,6 +15,7 @@ public class Elevator {
     protected int floorN;                   // Current floor
     protected int numFloors;                // Total num of floors
     protected boolean moving;               // Moving state
+    protected boolean startedMovement;
     protected List<Person> people;          // People currently inside
 
     protected Mutex peopleMtx;
@@ -25,6 +26,7 @@ public class Elevator {
     public Elevator (Building building, int capacity, int numFloors) {
         assert capacity > 0;
 
+        this.startedMovement = false;
         this.building = building;
         this.capacity = capacity;
         this.pos = 0;
@@ -86,6 +88,7 @@ public class Elevator {
     public void startMoving() {
         peopleMtx.lock();
         moving = true;
+        startedMovement = true;
         peopleMtx.unlock();
     }
 
@@ -102,6 +105,7 @@ public class Elevator {
         assert (MOVE_UNIT * direction) + pos >= 0;
         assert (MOVE_UNIT * direction) + pos <= (numFloors-1) * UNIT;
 
+        startedMovement = false;
         pos += (MOVE_UNIT * direction);
         floorN = pos / UNIT;
     }
@@ -173,5 +177,8 @@ public class Elevator {
         return requests;
     }
 
+    public boolean startedMovement() {
+        return startedMovement;
+    }
 
 }

@@ -6,9 +6,9 @@ import static java.lang.System.*;
 
 public class main {
 
-    private final static int NUM_FLOORS = 5;
+    private final static int NUM_FLOORS = 10;
     private final static int ELEVATOR_CAPACITY = 4;
-    private final static int NUM_PEOPLE = 1;
+    private final static int NUM_PEOPLE = 30;
 
     public static void main(String[] args) {
 
