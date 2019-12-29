@@ -114,4 +114,10 @@ public class Floor {
         waitingForElevator.broadcast();
         elevatorDoorMtx.unlock();
     }
+
+    public void clearRequest() {
+        buttonMtx.lock();
+        calling = null;
+        buttonMtx.unlock();
+    }
 }

@@ -9,6 +9,7 @@ public class Elevator {
     protected final static int UNIT = 10;               // To correct double conversions
     protected final static int MOVE_UNIT = UNIT/10;     // 10% of the UNIT
 
+    protected Building building;
     protected int capacity;                 // How many fit inside
     protected int pos;                      // Elevator position
     protected int floorN;                   // Current floor
@@ -21,9 +22,10 @@ public class Elevator {
     protected Request[] requests;
     protected Mutex requestsLock;
 
-    public Elevator (int capacity, int numFloors) {
+    public Elevator (Building building, int capacity, int numFloors) {
         assert capacity > 0;
 
+        this.building = building;
         this.capacity = capacity;
         this.pos = 0;
         this.floorN = 0;
@@ -117,6 +119,7 @@ public class Elevator {
 
         peopleMtx.lock();
         people.add(p);
+        pressButton(p);
         peopleMtx.unlock();
 
         assert people.contains(p);
@@ -137,13 +140,31 @@ public class Elevator {
         assert p != null;
         assert  people.contains(p);
 
-        //TODO outra lock?
         peopleMtx.lock();
         while (!isAtFloor(p.goal) || isMoving()) {
             peopleCV.await();
         }
         people.remove(p);
         peopleMtx.unlock();
+    }
+
+    public void pressButton (Person p) {
+        assert p != null;
+        assert people != null;
+        assert people.contains(p);
+
+        requestsLock.lock();
+        if (requests[p.goal] == null) {
+            requests[p.goal] = new Request(p.goal, "elevator");
+            building.callElevator();
+        }
+        requestsLock.unlock();
+    }
+
+    public  void clearRequest(int n) {
+        requestsLock.lock();
+        requests[n] = null;
+        requestsLock.unlock();
     }
 
     public Request[] getRequests() {

@@ -39,7 +39,7 @@ public class Building {
         assert floors != null : "Floors must be created first";
         assert capacity > 0 : "Bad capacity";
 
-        elevator = new Elevator (capacity, numFloors);
+        elevator = new Elevator (this, capacity, numFloors);
     }
 
     @Override
@@ -156,7 +156,7 @@ public class Building {
         assert floors != null;
         assert elevator != null;
 
-        elevator.getRequests()[n] = null;
-        floors[n].calling = null;
+        floors[n].clearRequest();
+        elevator.clearRequest(n);
     }
 }
