@@ -8,7 +8,6 @@ import pt.ua.concurrent.MutexCV;
 public class Floor {
 
     protected Building building;
-    protected Elevator elevator;
 
     protected int floorNum;                 // Floor number
     protected Request calling;              // Floor called elevator
@@ -25,7 +24,6 @@ public class Floor {
         assert floorNum >= 0;
 
         this.building = building;
-        this.elevator = building.getElevator();
         this.floorNum = floorNum;
         this.calling = null;
         this.people = new LinkedList<>();
@@ -66,11 +64,11 @@ public class Floor {
         assert people.contains(p);
 
         elevatorDoorMtx.lock();
-        while (elevator.isFull() || !elevator.isAtFloor(floorNum) || elevator.isMoving()) {
-            //TODO: press button again?
+        Elevator ele = building.getElevator();
+        while (!ele.isAtFloor(floorNum) || ele.isMoving() || ele.isFull()) {
             waitingForElevator.await();
         }
-        return elevator;
+        return ele;
     }
 
     public void grabElevatorDoor() {
@@ -111,4 +109,9 @@ public class Floor {
         return calling != null;
     }
 
+    public void openDoors() {
+        elevatorDoorMtx.lock();
+        waitingForElevator.broadcast();
+        elevatorDoorMtx.unlock();
+    }
 }

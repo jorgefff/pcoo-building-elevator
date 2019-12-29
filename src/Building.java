@@ -8,8 +8,6 @@ import javax.print.attribute.standard.ReferenceUriSchemesSupported;
 
 public class Building {
 
-    protected Request[] requests;
-
     protected int numFloors;
     protected Floor[] floors;
     protected Elevator elevator;
@@ -29,7 +27,6 @@ public class Building {
         assert floors == null : "Floors already created";
         assert n > 0 : "Bad number of floors";
 
-        requests = new Request[numFloors];
         numFloors = n;
         floors = new Floor[numFloors];
         for (int i = 0; i < numFloors; i++) {
@@ -110,18 +107,31 @@ public class Building {
     public boolean pendingRequests() {
         assert floors != null;
         assert elevator != null;
+
         for (Floor f: floors) {
             if (f.isCalling()) { return true; }
         }
-        //TODO check elevator requests
+
+        for (Request r: elevator.getRequests()) {
+            if (r != null) { return true; }
+        }
 
         return false;
+    }
+
+    public boolean isRequesting (int n) {
+        assert n >= 0 && n < numFloors;
+
+        return  elevator.getRequests()[n] != null ||
+                floors[n].calling != null;
     }
 
     public Request getNextDestination() {
         assert floors != null;
         assert elevator != null;
+
         Request req = null;
+
         // Get oldest elevator request
         for (Request newReq : elevator.getRequests()) {
             if (newReq == null) { continue; }
@@ -130,13 +140,23 @@ public class Building {
         }
 
         // Get oldest building request
-        for (Request newReq : requests) {
+        for (Floor f : floors) {
+            Request newReq = f.calling;
             if (newReq == null) { continue; }
             if (req == null) { req = newReq; }
             if (newReq.timestamp < req.timestamp) { req = newReq; }
         }
 
+        assert req != null;
         return req;
     }
 
+    public void clearRequests(int n) {
+        assert n >= 0 && n < numFloors;
+        assert floors != null;
+        assert elevator != null;
+
+        elevator.getRequests()[n] = null;
+        floors[n].calling = null;
+    }
 }

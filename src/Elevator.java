@@ -82,11 +82,16 @@ public class Elevator {
     }
 
     public void startMoving() {
+        peopleMtx.lock();
         moving = true;
+        peopleMtx.unlock();
     }
 
     public void stopMoving() {
         moving = false;
+        peopleMtx.lock();
+        peopleCV.broadcast();
+        peopleMtx.unlock();
     }
 
     public void move (int direction) {
@@ -128,8 +133,22 @@ public class Elevator {
         assert !people.contains(p);
     }
 
+    public void waitForFloor (Person p) {
+        assert p != null;
+        assert  people.contains(p);
+
+        //TODO outra lock?
+        peopleMtx.lock();
+        while (!isAtFloor(p.goal) || isMoving()) {
+            peopleCV.await();
+        }
+        people.remove(p);
+        peopleMtx.unlock();
+    }
+
     public Request[] getRequests() {
         assert requests != null;
+
         return requests;
     }
 

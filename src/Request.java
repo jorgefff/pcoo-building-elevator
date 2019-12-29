@@ -1,5 +1,5 @@
 
-public class Request implements Comparable<Request> {
+public class Request {
 
     public final int floor;
     public final long timestamp;
@@ -18,7 +18,7 @@ public class Request implements Comparable<Request> {
     }
 
     @Override
-    public int compareTo(Request request) {
-        return Long.compare(this.timestamp, request.timestamp);
+    public String toString() {
+        return "REQ-"+floor;
     }
 }
