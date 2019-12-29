@@ -3,8 +3,12 @@ import static java.lang.System.*;
 import pt.ua.concurrent.Mutex;
 import pt.ua.concurrent.MutexCV;
 
+import javax.print.attribute.standard.ReferenceUriSchemesSupported;
+
 
 public class Building {
+
+    protected Request[] requests;
 
     protected int numFloors;
     protected Floor[] floors;
@@ -13,13 +17,7 @@ public class Building {
     protected Mutex idle;
     protected MutexCV idleCV;
 
-    public Building (int numFloors, Elevator elevator) {
-        assert numFloors > 0;
-        assert elevator != null;
-
-        this.numFloors = numFloors;
-        this.elevator = elevator;
-
+    public Building() {
         this.idle = new Mutex(true);
         this.idleCV = idle.newCV();
     }
@@ -27,12 +25,24 @@ public class Building {
     /* **********************************************************************************************************
      * Common methods
      */
-    public void generateFloors() {
-        assert floors == null;
+    public void generateFloors(int n) {
+        assert floors == null : "Floors already created";
+        assert n > 0 : "Bad number of floors";
+
+        requests = new Request[numFloors];
+        numFloors = n;
         floors = new Floor[numFloors];
         for (int i = 0; i < numFloors; i++) {
             floors[i] = new Floor(i, this);
         }
+    }
+
+    public void generateElevator(int capacity) {
+        assert elevator == null : "Elevator already created";
+        assert floors != null : "Floors must be created first";
+        assert capacity > 0 : "Bad capacity";
+
+        elevator = new Elevator (capacity, numFloors);
     }
 
     @Override
@@ -51,6 +61,13 @@ public class Building {
 
     public int getNumFloors() {
         return numFloors;
+    }
+
+    public Floor getFloor(int n) {
+        assert floors != null;
+        assert n >= 0 && n < numFloors;
+
+        return floors[n];
     }
 
     public Elevator getElevator() {
@@ -92,10 +109,34 @@ public class Building {
 
     public boolean pendingRequests() {
         assert floors != null;
-        for(Floor f: floors) {
-            if (f.isCalling()) return true;
+        assert elevator != null;
+        for (Floor f: floors) {
+            if (f.isCalling()) { return true; }
         }
+        //TODO check elevator requests
+
         return false;
+    }
+
+    public Request getNextDestination() {
+        assert floors != null;
+        assert elevator != null;
+        Request req = null;
+        // Get oldest elevator request
+        for (Request newReq : elevator.getRequests()) {
+            if (newReq == null) { continue; }
+            if (req == null) { req = newReq; }
+            if (newReq.timestamp < req.timestamp) { req = newReq; }
+        }
+
+        // Get oldest building request
+        for (Request newReq : requests) {
+            if (newReq == null) { continue; }
+            if (req == null) { req = newReq; }
+            if (newReq.timestamp < req.timestamp) { req = newReq; }
+        }
+
+        return req;
     }
 
 }

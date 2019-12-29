@@ -11,12 +11,15 @@ public class Floor {
     protected Elevator elevator;
 
     protected int floorNum;                 // Floor number
-    protected boolean calling;              // Floor called elevator
+    protected Request calling;              // Floor called elevator
     protected List<Person> people;          // List of people in this floor
 
     protected final Mutex peopleMtx;
+
     protected final Mutex elevatorDoorMtx;
     protected final MutexCV waitingForElevator;
+
+    protected final Mutex buttonMtx;
 
     public Floor(int floorNum, Building building) {
         assert floorNum >= 0;
@@ -24,11 +27,12 @@ public class Floor {
         this.building = building;
         this.elevator = building.getElevator();
         this.floorNum = floorNum;
-        this.calling = false;
+        this.calling = null;
         this.people = new LinkedList<>();
         this.peopleMtx = new Mutex(true);
         this.elevatorDoorMtx = new Mutex(true);
         this.waitingForElevator = elevatorDoorMtx.newCV();
+        this.buttonMtx = new Mutex(true);
     }
 
     public void enter (Person p) {
@@ -48,7 +52,12 @@ public class Floor {
         assert people != null;
         assert people.contains(p);
 
+        buttonMtx.lock();       //TODO: e se o elevador ja ca esta?
+        if (calling == null) {
+            calling = new Request(floorNum, "building");
+        }
         building.callElevator();
+        buttonMtx.unlock();
     }
 
     public Elevator queueForElevator (Person p) {
@@ -56,13 +65,18 @@ public class Floor {
         assert people != null;
         assert people.contains(p);
 
-
         elevatorDoorMtx.lock();
         while (elevator.isFull() || !elevator.isAtFloor(floorNum) || elevator.isMoving()) {
             //TODO: press button again?
             waitingForElevator.await();
         }
         return elevator;
+    }
+
+    public void grabElevatorDoor() {
+        assert !elevatorDoorMtx.lockIsMine();
+
+        elevatorDoorMtx.lock();
     }
 
     public void releaseElevatorDoor() {
@@ -94,7 +108,7 @@ public class Floor {
     }
 
     public boolean isCalling() {
-        return calling;
+        return calling != null;
     }
 
 }

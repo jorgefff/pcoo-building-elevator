@@ -27,36 +27,52 @@ public class ElevatorControl extends Thread {
 
     @Override
     public void run() {
-        while (true) {
-            // Check current state of elevator
+        State currState = State.IDLE;
+        State nextState = State.IDLE;
+        for(;;currState = nextState) {
+            // Update info
             int currFloorN = elevator.getFloorN();
+            Floor currFloor = building.getFloor(currFloorN);
 
-            // Decide what to do
-            Actions task = Actions.IDLE;
 
-            switch (task) {
-                case MOVE:
-                    break;
+            out.println("\n\n\n\n"+building);
 
-                case STOP:
-                    break;
-
+            switch (currState) {
                 case IDLE:
+                    building.idle();
+                    nextState = State.CHECK_REQUESTS;
                     break;
 
-                case NEW_DESTINATION:
+                case MOVING:
+                    elevator.move(direction);
+                    break;
+
+                case STOPPED:
+                    break;
+
+                case CHECK_REQUESTS:
+                    if (!building.pendingRequests()) {
+                        nextState = State.IDLE;
+                        break;
+                    }
+                    destination = building.getNextDestination();
+                    if (destination.floor > currFloorN) { direction = 1; }
+                    else                                { direction = -1; }
+                    currFloor.grabElevatorDoor();
+                    elevator.startMoving();
+                    currFloor.releaseElevatorDoor();
+                    nextState = State.MOVING;
                     break;
             }
-            out.println("\n\n\n\n"+building);
+
             pause();
         }
     }
 
-    private enum Actions {
-        ARRIVED,
-        NEW_DESTINATION,
-        MOVE,
-        STOP,
+    private enum State {
         IDLE,
+        MOVING,
+        STOPPED,
+        CHECK_REQUESTS,
     }
 }

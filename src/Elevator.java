@@ -113,6 +113,25 @@ public class Elevator {
         peopleMtx.lock();
         people.add(p);
         peopleMtx.unlock();
+
+        assert people.contains(p);
     }
+
+    public void exit (Person p) {
+        assert p != null;
+        assert people.contains(p);
+
+        peopleMtx.lock();
+        people.add(p);
+        peopleMtx.unlock();
+
+        assert !people.contains(p);
+    }
+
+    public Request[] getRequests() {
+        assert requests != null;
+        return requests;
+    }
+
 
 }

@@ -12,12 +12,10 @@ public class main {
 
     public static void main(String[] args) {
 
-        // Initialize shared area - elevator
-        Elevator elevator = new Elevator(ELEVATOR_CAPACITY, NUM_FLOORS);
-
-        // Initialize shared area - building and its floors
-        Building building = new Building(NUM_FLOORS, elevator);
-        building.generateFloors();
+        // Initialize shared areaS
+        Building building = new Building();
+        building.generateFloors(NUM_FLOORS);
+        building.generateElevator(ELEVATOR_CAPACITY);
 
         // Initialize active entity - elevator controller
         ElevatorControl controller = new ElevatorControl(building);
