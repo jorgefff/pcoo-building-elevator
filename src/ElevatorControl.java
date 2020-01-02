@@ -2,6 +2,7 @@ import static java.lang.System.*;
 
 public class ElevatorControl extends Thread {
 
+    protected static long CONTROL_PAUSE = 1;
     protected Building building; // TODO: trocar para Building_Ctrl
     protected Elevator elevator;
     protected Request destination;
@@ -17,7 +18,7 @@ public class ElevatorControl extends Thread {
     // Pause to simulate waiting for people's actions
     private void pause() {
         try {
-            Thread.sleep(100);
+            Thread.sleep(CONTROL_PAUSE);
         } catch (InterruptedException e) {
             e.printStackTrace();
             exit(1);
@@ -75,10 +76,17 @@ public class ElevatorControl extends Thread {
                         break;
                     }
                     destination = building.getNextDestination();
-                    if (destination.floor > currFloorN) { direction = 1; }
-                    else                                { direction = -1; }
+                    if (destination.floor > currFloorN)         { direction = 1; }
+                    else if (destination.floor < currFloorN)    { direction = -1; }
+                    else {
+                        //TODO....?
+                        //TODO refresh requests (pelas Person) depois do clear?
+                        building.clearRequests(currFloorN);
+                        currFloor.openDoors();
+                        nextState = State.STOPPED; out.println("MOVING -> STOP");
+                        break;
+                    }
                     currFloor.grabElevatorDoor();
-                    //TODO: grab elevator MTX para impedir que saiam em movimento
                     elevator.startMoving();
                     currFloor.releaseElevatorDoor();
                     nextState = State.MOVING; out.println("CHECK -> MOVING");

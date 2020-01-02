@@ -17,8 +17,8 @@ public class Person extends Thread {
         do {
             goal = randFloor (building.getNumFloors());
         } while (goal == start);
-//        start = 3;  //DEBUG
-//        goal = 1;  //DEBUG
+        start = 0;
+        goal = 1;
     }
 
     @Override
@@ -50,15 +50,20 @@ public class Person extends Thread {
         Floor floor;
         Elevator elevator;
         out.println(this);
+        try {
+            floor = building.enterFloor(this, start);
+            floor.callElevator(this);
+            elevator = floor.queueForElevator(this);
+            floor.exit(this);
+            elevator.enter(this);
+            floor.releaseElevatorDoor();
+            elevator.waitForFloor(this);
 
-        floor = building.enterFloor(this, start);
-        floor.callElevator(this);
-        elevator = floor.queueForElevator(this);
-        floor.exit(this);
-        elevator.enter(this);
-        floor.releaseElevatorDoor();
-        elevator.waitForFloor(this);
-
-        out.println("PERSON ARRIVED");
+            out.println("PERSON ARRIVED");
+        }
+        catch (Exception e) {
+            err.println("ERROR:"+e.getMessage());
+            System.exit(1);
+        }
     }
 }

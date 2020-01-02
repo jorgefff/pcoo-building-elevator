@@ -8,14 +8,18 @@ public class main {
 
     private final static int NUM_FLOORS = 10;
     private final static int ELEVATOR_CAPACITY = 4;
-    private final static int NUM_PEOPLE = 30;
+    private final static int NUM_PEOPLE = 200;
 
     public static void main(String[] args) {
 
-        // Initialize shared areaS
+        // Initialize shared areas
         Building building = new Building();
         building.generateFloors(NUM_FLOORS);
         building.generateElevator(ELEVATOR_CAPACITY);
+
+        // Set up graphical
+        Graphical g = Graphical.getInstance();
+        g.setBuilding(building);
 
         // Initialize active entity - elevator controller
         ElevatorControl controller = new ElevatorControl(building);
@@ -37,6 +41,7 @@ public class main {
                 System.exit(1);
             }
         }
+        out.println("EVERY PERSON ARRIVED");
         try {
             controller.join();
         } catch (InterruptedException e) {
