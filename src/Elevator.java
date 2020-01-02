@@ -109,7 +109,9 @@ public class Elevator {
         assert (MOVE_UNIT * direction) + pos <= (numFloors-1) * UNIT;
 
         startedMovement = false;
+        int oldPos = pos;
         pos += (MOVE_UNIT * direction);
+        Graphical.getInstance().updateElevatorPos(oldPos, pos);
         floorN = pos / UNIT;
     }
 
@@ -126,22 +128,24 @@ public class Elevator {
 
         peopleMtx.lock();
         people.add(p);
+        Graphical.getInstance().updateElevatorPpl(this);
         pressButton(p);
         peopleMtx.unlock();
 
         assert people.contains(p);
     }
 
-    public void exit (Person p) {
-        assert p != null;
-        assert people.contains(p);
-
-        peopleMtx.lock();
-        people.add(p);
-        peopleMtx.unlock();
-
-        assert !people.contains(p);
-    }
+//    public void exit (Person p) {
+//        assert p != null;
+//        assert people.contains(p);
+//
+//        peopleMtx.lock();
+//        people.add(p);
+//        Graphical.getInstance().updateElevatorPpl(this);
+//        peopleMtx.unlock();
+//
+//        assert !people.contains(p);
+//    }
 
     public void waitForFloor (Person p) {
         assert p != null;
@@ -153,6 +157,7 @@ public class Elevator {
             peopleCV.await();
         }
         people.remove(p);
+        Graphical.getInstance().updateElevatorPpl(this);
         peopleMtx.unlock();
     }
 

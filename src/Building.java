@@ -7,7 +7,7 @@ import javax.print.attribute.standard.ReferenceUriSchemesSupported;
 
 
 public class Building {
-    protected static boolean ELEVATOR_PRIORITY;
+    protected boolean ELEVATOR_PRIORITY;
     protected int numFloors;
     protected Floor[] floors;
     protected Elevator elevator;
@@ -16,12 +16,12 @@ public class Building {
     protected MutexCV idleCV;
 
     public Building() {
-        ELEVATOR_PRIORITY = false;
+        this.ELEVATOR_PRIORITY = false;
         this.idle = new Mutex(true);
         this.idleCV = idle.newCV();
     }
     public Building(boolean elePriority) {
-        ELEVATOR_PRIORITY = elePriority;
+        this.ELEVATOR_PRIORITY = elePriority;
         this.idle = new Mutex(true);
         this.idleCV = idle.newCV();
     }

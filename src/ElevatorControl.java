@@ -2,13 +2,14 @@ import static java.lang.System.*;
 
 public class ElevatorControl extends Thread {
 
-    protected static long CONTROL_PAUSE = 1;
+    protected long CONTROL_PAUSE = 1;
     protected Building building; // TODO: trocar para Building_Ctrl
     protected Elevator elevator;
     protected Request destination;
     protected int direction;
 
-    public ElevatorControl(Building building) {
+    public ElevatorControl(Building building, long pause) {
+        this.CONTROL_PAUSE = pause;
         this.building = building;
         this.elevator = building.getElevator();
         this.destination = null;

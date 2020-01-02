@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -8,7 +9,7 @@ public class main {
 
     private final static int NUM_FLOORS = 10;
     private final static int ELEVATOR_CAPACITY = 4;
-    private final static int NUM_PEOPLE = 1000;
+    private final static int NUM_PEOPLE = 20;
 
     public static void main(String[] args) {
 
@@ -19,11 +20,12 @@ public class main {
 
         // Set up graphical
         Graphical g = Graphical.getInstance();
-        g.start();
-        g.setBuilding(building);
+//        g.start();
+        g.setBuilding(building, NUM_PEOPLE, Color.BLACK, Color.green);
 
         // Initialize active entity - elevator controller
-        ElevatorControl controller = new ElevatorControl(building);
+        long pause = 100;
+        ElevatorControl controller = new ElevatorControl(building, pause);
         controller.start();
 
         // Initialize active entity - person
