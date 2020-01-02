@@ -2,8 +2,8 @@ import static java.lang.System.*;
 
 public class Person extends Thread {
 
-    protected final long MIN_START_SLEEP = 200;
-    protected final long MAX_START_SLEEP = 2000;
+    protected final long MIN_START_SLEEP = 100;
+    protected final long MAX_START_SLEEP = 1000;
 
     protected int start;
     protected int goal;
@@ -17,8 +17,6 @@ public class Person extends Thread {
         do {
             goal = randFloor (building.getNumFloors());
         } while (goal == start);
-        start = 0;
-        goal = 1;
     }
 
     @Override
@@ -50,20 +48,14 @@ public class Person extends Thread {
         Floor floor;
         Elevator elevator;
         out.println(this);
-        try {
-            floor = building.enterFloor(this, start);
-            floor.callElevator(this);
-            elevator = floor.queueForElevator(this);
-            floor.exit(this);
-            elevator.enter(this);
-            floor.releaseElevatorDoor();
-            elevator.waitForFloor(this);
+        floor = building.enterFloor(this, start);
+        floor.callElevator(this);
+        elevator = floor.queueForElevator(this);
+        floor.exit(this);
+        elevator.enter(this);
+        floor.releaseElevatorDoor();
+        elevator.waitForFloor(this);
 
-            out.println("PERSON ARRIVED");
-        }
-        catch (Exception e) {
-            err.println("ERROR:"+e.getMessage());
-            System.exit(1);
-        }
+        out.println("PERSON ARRIVED");
     }
 }

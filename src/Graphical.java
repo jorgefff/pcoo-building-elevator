@@ -27,9 +27,15 @@ public class Graphical {
         return instance;
     }
 
-    public void setBuilding (Building b) {
+    public void setBuilding (Building building) {
+        assert building != null;
+
         instanceMtx.lock();
-        this.b = b;
+        this.b = building;
+        int numOfLines = b.getNumFloors() * b.getElevator().getMovementUnit();
+        int numOfCols = 4;
+        int numOfLayers = 3;
+        gboard = new GBoard("Building elevator manager", numOfLines, numOfCols, numOfLayers);
         instanceMtx.unlock();
     }
 

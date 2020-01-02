@@ -49,7 +49,7 @@ public class ElevatorControl extends Thread {
                     break;
 
                 case MOVING:
-                    if (isRequesting && isAtAFloor && !startedMovement) {
+                    if (isRequesting && isAtAFloor && !startedMovement || direction == 0) {
                         elevator.stopMoving();
                         building.clearRequests(currFloorN);
                         currFloor.openDoors();
@@ -79,11 +79,9 @@ public class ElevatorControl extends Thread {
                     if (destination.floor > currFloorN)         { direction = 1; }
                     else if (destination.floor < currFloorN)    { direction = -1; }
                     else {
-                        //TODO....?
-                        //TODO refresh requests (pelas Person) depois do clear?
                         building.clearRequests(currFloorN);
                         currFloor.openDoors();
-                        nextState = State.STOPPED; out.println("MOVING -> STOP");
+                        nextState = State.CHECK_REQUESTS; out.println("CHECK -> CHECK");
                         break;
                     }
                     currFloor.grabElevatorDoor();

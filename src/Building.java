@@ -7,7 +7,7 @@ import javax.print.attribute.standard.ReferenceUriSchemesSupported;
 
 
 public class Building {
-
+    protected static boolean ELEVATOR_PRIORITY;
     protected int numFloors;
     protected Floor[] floors;
     protected Elevator elevator;
@@ -16,6 +16,12 @@ public class Building {
     protected MutexCV idleCV;
 
     public Building() {
+        ELEVATOR_PRIORITY = false;
+        this.idle = new Mutex(true);
+        this.idleCV = idle.newCV();
+    }
+    public Building(boolean elePriority) {
+        ELEVATOR_PRIORITY = elePriority;
         this.idle = new Mutex(true);
         this.idleCV = idle.newCV();
     }
@@ -138,6 +144,8 @@ public class Building {
             if (req == null) { req = newReq; }
             if (newReq.timestamp < req.timestamp) { req = newReq; }
         }
+
+        if (ELEVATOR_PRIORITY && req != null) return req;
 
         // Get oldest building request
         for (Floor f : floors) {

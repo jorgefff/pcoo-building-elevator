@@ -57,6 +57,9 @@ public class Elevator {
         return "ELEVATOR-POS( "+pos+" )-FLR( "+ floorN +" )";
     }
 
+    public int getMovementUnit() {
+        return UNIT;
+    }
     public double getPosition() {
         return pos;
     }
@@ -146,6 +149,7 @@ public class Elevator {
 
         peopleMtx.lock();
         while (!isAtFloor(p.goal) || isMoving()) {
+            pressButton(p);
             peopleCV.await();
         }
         people.remove(p);
