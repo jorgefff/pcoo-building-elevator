@@ -1,10 +1,5 @@
-import static java.lang.System.*;
-
 import pt.ua.concurrent.Mutex;
 import pt.ua.concurrent.MutexCV;
-
-import javax.print.attribute.standard.ReferenceUriSchemesSupported;
-
 
 public class Building {
     protected boolean ELEVATOR_PRIORITY;

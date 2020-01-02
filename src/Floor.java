@@ -1,6 +1,5 @@
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 import pt.ua.concurrent.Mutex;
 import pt.ua.concurrent.MutexCV;
@@ -14,10 +13,8 @@ public class Floor {
     protected List<Person> people;          // List of people in this floor
 
     protected final Mutex peopleMtx;
-
     protected final Mutex elevatorDoorMtx;
     protected final MutexCV waitingForElevator;
-
     protected final Mutex buttonMtx;
 
     public Floor(int floorNum, Building building) {

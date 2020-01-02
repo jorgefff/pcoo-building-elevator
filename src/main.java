@@ -1,15 +1,16 @@
-import javax.swing.*;
 import java.awt.*;
-import java.util.LinkedList;
-import java.util.List;
 
 import static java.lang.System.*;
 
 public class main {
 
-    private final static int NUM_FLOORS = 10;
-    private final static int ELEVATOR_CAPACITY = 4;
-    private final static int NUM_PEOPLE = 20;
+    private static final int NUM_FLOORS = 10;
+    private static final int ELEVATOR_CAPACITY = 4;
+    private static final int NUM_PEOPLE = 20;
+    private static final long CTRL_PAUSE = 50;
+    private static final Color FLOOR_COLOR = Color.black;
+    private static final Color ELEV_COLOR = Color.green;
+
 
     public static void main(String[] args) {
 
@@ -20,12 +21,10 @@ public class main {
 
         // Set up graphical
         Graphical g = Graphical.getInstance();
-//        g.start();
-        g.setBuilding(building, NUM_PEOPLE, Color.BLACK, Color.green);
+        g.setBuilding(building, NUM_PEOPLE, FLOOR_COLOR, ELEV_COLOR);
 
         // Initialize active entity - elevator controller
-        long pause = 100;
-        ElevatorControl controller = new ElevatorControl(building, pause);
+        ElevatorControl controller = new ElevatorControl(building, CTRL_PAUSE);
         controller.start();
 
         // Initialize active entity - person

@@ -135,18 +135,6 @@ public class Elevator {
         assert people.contains(p);
     }
 
-//    public void exit (Person p) {
-//        assert p != null;
-//        assert people.contains(p);
-//
-//        peopleMtx.lock();
-//        people.add(p);
-//        Graphical.getInstance().updateElevatorPpl(this);
-//        peopleMtx.unlock();
-//
-//        assert !people.contains(p);
-//    }
-
     public void waitForFloor (Person p) {
         assert p != null;
         assert  people.contains(p);
