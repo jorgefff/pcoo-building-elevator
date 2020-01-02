@@ -18,8 +18,9 @@ public class main {
         building.generateElevator(ELEVATOR_CAPACITY);
 
         // Set up graphical
-//        Graphical g = Graphical.getInstance();
-//        g.setBuilding(building);
+        Graphical g = Graphical.getInstance();
+        g.start();
+        g.setBuilding(building);
 
         // Initialize active entity - elevator controller
         ElevatorControl controller = new ElevatorControl(building);
@@ -41,6 +42,8 @@ public class main {
                 System.exit(1);
             }
         }
+
         out.println("EVERY PERSON ARRIVED");
+        System.exit(0);
     }
 }

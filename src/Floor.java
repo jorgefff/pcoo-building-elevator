@@ -33,6 +33,10 @@ public class Floor {
         this.buttonMtx = new Mutex(true);
     }
 
+    public int getFloorNum() {
+        return floorNum;
+    }
+
     public void enter (Person p) {
         assert p != null;
         assert people != null;
@@ -40,6 +44,7 @@ public class Floor {
 
         peopleMtx.lock();
         people.add(p);
+        Graphical.getInstance().updateFloor(this);
         peopleMtx.unlock();
 
         assert people.contains(p);
@@ -91,6 +96,7 @@ public class Floor {
 
         peopleMtx.lock();
         people.remove(p);
+        Graphical.getInstance().updateFloor(this);
         peopleMtx.unlock();
 
         assert !people.contains(p);

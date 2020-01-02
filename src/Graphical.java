@@ -1,3 +1,4 @@
+import static java.lang.System.*;
 import pt.ua.concurrent.Mutex;
 import pt.ua.gboard.*;
 import pt.ua.gboard.basic.ImageGelem;
@@ -12,9 +13,23 @@ public class Graphical {
 
     protected GBoard gboard;
     protected Building b;
+    protected MutableStringGelem[] floors;
+    protected MutableStringGelem elevTxt;
+    protected ImageGelem elevImg;
+
+    protected static final int NUM_LAYERS = 3;
+    protected static final int IMG_LAYER = 1;
+    protected static final int TXT_LAYER = 2;
+    protected static final int ELEV_X = 2;
+    protected static final int FL_X = 1;
+    protected static int CELL_HEIGHT = 10;
+    protected static final int CELL_WIDTH = 1;
 
     private Graphical () {
         b = null;
+        floors = null;
+        elevTxt = null;
+        elevImg = null;
         gboard = null;
     }
 
@@ -29,14 +44,43 @@ public class Graphical {
 
     public void setBuilding (Building building) {
         assert building != null;
+        assert  ImageGelem.isImage("elevator.png");
 
         instanceMtx.lock();
-        this.b = building;
-        int numOfLines = b.getNumFloors() * b.getElevator().getMovementUnit();
-        int numOfCols = 4;
-        int numOfLayers = 3;
-        gboard = new GBoard("Building elevator manager", numOfLines, numOfCols, numOfLayers);
+
+        b = building;
+        CELL_HEIGHT = b.getElevator().getMovementUnit();
+        int bHeight = b.getNumFloors() * CELL_HEIGHT;
+        int bWidth = 4;
+        gboard = new GBoard("Building elevator manager", bHeight, bWidth, NUM_LAYERS);
+
+        int elevY = (b.getNumFloors()-1) * CELL_HEIGHT;
+        elevImg = new ImageGelem("elevator.png", gboard, 90, CELL_HEIGHT, CELL_WIDTH);
+        gboard.draw(elevImg, elevY, ELEV_X, IMG_LAYER);
+        elevTxt = new MutableStringGelem("0", Color.green, CELL_HEIGHT, CELL_WIDTH);
+        gboard.draw(elevTxt, elevY, ELEV_X, TXT_LAYER);
+
+        floors = new MutableStringGelem[b.getNumFloors()];
+        for (int i = 0; i < b.getNumFloors(); i++) {
+            floors[i] = new MutableStringGelem("0", Color.green, CELL_HEIGHT, 1);
+            int floorY = (b.getNumFloors()-1-i) * b.getElevator().getMovementUnit();
+            gboard.draw(floors[i], floorY, FL_X, TXT_LAYER);
+        }
+
         instanceMtx.unlock();
+    }
+
+    public void updateFloor(Floor f) {
+        assert floors != null;
+
+        String str = ""+f.getOccupancy();
+        floors[f.getFloorNum()].setText(str);
+    }
+
+    public void updateElevator(Elevator e) {
+        assert elevTxt != null;
+
+
     }
 
     public void start() {
