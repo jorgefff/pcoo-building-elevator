@@ -52,7 +52,7 @@ public class Floor {
         assert people != null;
         assert people.contains(p);
 
-        buttonMtx.lock();       //TODO: e se o elevador ja ca esta?
+        buttonMtx.lock();
         if (calling == null) {
             calling = new Request(floorNum, "building");
         }

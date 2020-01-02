@@ -1,6 +1,7 @@
 import pt.ua.concurrent.Mutex;
 import pt.ua.concurrent.MutexCV;
 
+
 public class Building {
     protected boolean ELEVATOR_PRIORITY;
     protected int numFloors;

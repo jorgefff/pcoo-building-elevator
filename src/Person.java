@@ -2,9 +2,12 @@ import static java.lang.System.*;
 
 public class Person extends Thread {
 
+    private static int personCounter = 0;
+
     protected final long MIN_START_SLEEP = 100;
     protected final long MAX_START_SLEEP = 1000;
 
+    protected int id;
     protected int start;
     protected int goal;
     protected Building building;
@@ -13,6 +16,7 @@ public class Person extends Thread {
         assert building != null;
 
         this.building = building;
+        this.id = personCounter++;
         start = randFloor (building.getNumFloors());
         do {
             goal = randFloor (building.getNumFloors());
