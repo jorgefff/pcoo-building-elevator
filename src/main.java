@@ -27,7 +27,7 @@ public class main {
 
         // Set up graphical
         Graphical g = Graphical.getInstance();
-        g.setBuilding(building, NUM_PEOPLE, FLOOR_COLOR, ELEV_COLOR);
+        g.config(building, NUM_PEOPLE, FLOOR_COLOR, ELEV_COLOR);
 
         // Initialize active entity - elevator controller
         ElevatorControl controller = new ElevatorControl(building, CTRL_PAUSE);
