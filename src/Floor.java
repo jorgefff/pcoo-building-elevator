@@ -44,10 +44,14 @@ public class Floor {
         assert !peopleIn.contains(p);
 
         peopleMtx.lock();
-        peopleIn.add(p);
-        Graphical.getInstance().updateFloor(this);
-        peopleMtx.unlock();
-
+        try {
+            peopleIn.add(p);
+            Graphical.getInstance().updateFloor(this);
+        }
+        finally {
+            peopleMtx.unlock();
+        }
+        
         assert peopleIn.contains(p);
     }
 
@@ -57,11 +61,15 @@ public class Floor {
         assert peopleIn.contains(p);
 
         buttonMtx.lock();
-        if (calling == null) {
-            calling = new Request(floorNum, "building");
+        try {
+            if (calling == null) {
+                calling = new Request(floorNum, "building");
+            }
+            building.callElevator();
         }
-        building.callElevator();
-        buttonMtx.unlock();
+        finally {
+            buttonMtx.unlock();
+        }
     }
 
     public Elevator queueForElevator (Person p) {
@@ -96,9 +104,13 @@ public class Floor {
         assert peopleIn.contains(p);
 
         peopleMtx.lock();
-        peopleIn.remove(p);
-        Graphical.getInstance().updateFloor(this);
-        peopleMtx.unlock();
+        try {
+            peopleIn.remove(p);
+            Graphical.getInstance().updateFloor(this);
+        }
+        finally {
+            peopleMtx.unlock();
+        }
 
         assert !peopleIn.contains(p);
     }
@@ -109,9 +121,13 @@ public class Floor {
         assert !peopleOut.contains(p);
 
         arriveMtx.lock();
-        peopleOut.add(p);
-        Graphical.getInstance().updateArrival(this);
-        arriveMtx.unlock();
+        try {
+            peopleOut.add(p);
+            Graphical.getInstance().updateArrival(this);
+        }
+        finally {
+            arriveMtx.unlock();
+        }
 
         assert peopleOut.contains(p);
     }
@@ -138,13 +154,21 @@ public class Floor {
 
     public void openDoors() {
         elevatorDoorMtx.lock();
-        waitingForElevator.broadcast();
-        elevatorDoorMtx.unlock();
+        try {
+            waitingForElevator.broadcast();
+        }
+        finally {
+            elevatorDoorMtx.unlock();
+        }
     }
 
     public void clearRequest() {
         buttonMtx.lock();
-        calling = null;
-        buttonMtx.unlock();
+        try {
+            calling = null;
+        }
+        finally {
+            buttonMtx.unlock();
+        }
     }
 }
