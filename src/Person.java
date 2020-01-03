@@ -47,11 +47,13 @@ public class Person extends Thread {
     }
 
     @Override
-    public void run() { //TODO: convert to thread pool
+    public void run() {
         randStartSleep();
+        out.println(this);
+
         Floor floor;
         Elevator elevator;
-        out.println(this);
+
         floor = building.enterFloor(this, start);
         floor.callElevator(this);
         elevator = floor.queueForElevator(this);
