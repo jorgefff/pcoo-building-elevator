@@ -65,8 +65,9 @@ public class Graphical {
 
         // Set up floors occupancy text
         floors = new MutableStringGelem[b.getNumFloors()];
+        String flDefaultTxt = String.format("%0"+floorDigits+"d", 0);
         for (int i = 0; i < b.getNumFloors(); i++) {
-            floors[i] = new MutableStringGelem("0", floorColor, CELL_HEIGHT, 1);
+            floors[i] = new MutableStringGelem(flDefaultTxt, floorColor, CELL_HEIGHT, 1);
             int floorY = (b.getNumFloors()-1-i) * b.getElevator().getMovementUnit();
             gboard.draw(floors[i], floorY, FL_X, TXT_LAYER);
         }
@@ -75,7 +76,8 @@ public class Graphical {
         int elevY = (b.getNumFloors()-1) * CELL_HEIGHT;
         elevImg = new ImageGelem("elevator.png", gboard, 90, CELL_HEIGHT, CELL_WIDTH);
         gboard.draw(elevImg, elevY, ELEV_X, IMG_LAYER);
-        elevTxt = new MutableStringGelem("0", elevColor, CELL_HEIGHT, CELL_WIDTH);
+        String elevDefaultTxt = String.format("%0"+elevDigits+"d", 0);
+        elevTxt = new MutableStringGelem(elevDefaultTxt, elevColor, CELL_HEIGHT, CELL_WIDTH);
         gboard.draw(elevTxt, elevY, ELEV_X, TXT_LAYER);
 
         instanceMtx.unlock();
