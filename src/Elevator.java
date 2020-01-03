@@ -44,14 +44,6 @@ public class Elevator {
      * Common methods
      */
 
-    /* **********************************************************************************************************
-     * Person methods
-     */
-
-    /* **********************************************************************************************************
-     * ElevatorControl methods
-     */
-
     @Override
     public String toString() {
         return "ELEVATOR-POS( "+pos+" )-FLR( "+ floorN +" )";
@@ -88,36 +80,13 @@ public class Elevator {
         return floorN == n && isAtAFloor();
     }
 
-    public void startMoving() {
-        peopleMtx.lock();
-        moving = true;
-        startedMovement = true;
-        peopleMtx.unlock();
-    }
-
-    public void stopMoving() {
-        moving = false;
-        peopleMtx.lock();
-        peopleCV.broadcast();
-        peopleMtx.unlock();
-    }
-
-    public void move (int direction) {
-        assert moving;
-        assert direction == -1 || direction == 1;
-        assert (MOVE_UNIT * direction) + pos >= 0;
-        assert (MOVE_UNIT * direction) + pos <= (numFloors-1) * UNIT;
-
-        startedMovement = false;
-        int oldPos = pos;
-        pos += (MOVE_UNIT * direction);
-        Graphical.getInstance().updateElevatorPos(oldPos, pos);
-        floorN = pos / UNIT;
-    }
-
     public boolean isFull() {
         return people.size() == capacity;
     }
+
+    /* **********************************************************************************************************
+     * Person methods
+     */
 
     public void enter (Person p) {
         assert p != null;
@@ -160,6 +129,37 @@ public class Elevator {
             building.callElevator();
         }
         requestsLock.unlock();
+    }
+
+    /* **********************************************************************************************************
+     * ElevatorControl methods
+     */
+
+    public void startMoving() {
+        peopleMtx.lock();
+        moving = true;
+        startedMovement = true;
+        peopleMtx.unlock();
+    }
+
+    public void stopMoving() {
+        moving = false;
+        peopleMtx.lock();
+        peopleCV.broadcast();
+        peopleMtx.unlock();
+    }
+
+    public void move (int direction) {
+        assert moving;
+        assert direction == -1 || direction == 1;
+        assert (MOVE_UNIT * direction) + pos >= 0;
+        assert (MOVE_UNIT * direction) + pos <= (numFloors-1) * UNIT;
+
+        startedMovement = false;
+        int oldPos = pos;
+        pos += (MOVE_UNIT * direction);
+        Graphical.getInstance().updateElevatorPos(oldPos, pos);
+        floorN = pos / UNIT;
     }
 
     public  void clearRequest(int n) {
