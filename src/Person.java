@@ -10,9 +10,9 @@ public class Person extends Thread {
     protected int id;
     protected int start;
     protected int goal;
-    protected Building building;
+    protected Building_Prsn building;
 
-    public Person (Building building) {
+    public Person (Building_Prsn building) {
         assert building != null;
 
         this.building = building;
@@ -54,7 +54,7 @@ public class Person extends Thread {
         Floor floor;
         Elevator elevator;
 
-        floor = building.enterFloor(this, start);
+        floor = building.enterFloor(this);
         floor.callElevator(this);
         elevator = floor.queueForElevator(this);
         floor.exit(this);
@@ -62,6 +62,7 @@ public class Person extends Thread {
         floor.releaseElevatorDoor();
         elevator.waitForFloor(this);
         building.getFloor(goal).arrive(this);
+
         out.println("PERSON ARRIVED");
     }
 }
