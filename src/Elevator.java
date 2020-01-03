@@ -96,10 +96,14 @@ public class Elevator {
         assert people.size() < capacity;
 
         peopleMtx.lock();
-        people.add(p);
-        Graphical.getInstance().updateElevatorPpl(this);
-        pressButton(p);
-        peopleMtx.unlock();
+        try {
+            people.add(p);
+            Graphical.getInstance().updateElevatorPpl(this);
+            pressButton(p);
+        }
+        finally {
+            peopleMtx.unlock();
+        }
 
         assert people.contains(p);
     }
@@ -109,13 +113,17 @@ public class Elevator {
         assert  people.contains(p);
 
         peopleMtx.lock();
-        while (!isAtFloor(p.goal) || isMoving()) {
-            pressButton(p);
-            peopleCV.await();
+        try {
+            while (!isAtFloor(p.goal) || isMoving()) {
+                pressButton(p);
+                peopleCV.await();
+            }
+            people.remove(p);
+            Graphical.getInstance().updateElevatorPpl(this);
         }
-        people.remove(p);
-        Graphical.getInstance().updateElevatorPpl(this);
-        peopleMtx.unlock();
+        finally {
+            peopleMtx.unlock();
+        }
     }
 
     public void pressButton (Person p) {
@@ -124,11 +132,15 @@ public class Elevator {
         assert people.contains(p);
 
         requestsLock.lock();
-        if (requests[p.goal] == null) {
-            requests[p.goal] = new Request(p.goal, "elevator");
-            building.callElevator();
+        try {
+            if (requests[p.goal] == null) {
+                requests[p.goal] = new Request(p.goal, "elevator");
+                building.callElevator();
+            }
         }
-        requestsLock.unlock();
+        finally {
+            requestsLock.unlock();
+        }
     }
 
     /* **********************************************************************************************************
@@ -137,16 +149,24 @@ public class Elevator {
 
     public void startMoving() {
         peopleMtx.lock();
-        moving = true;
-        startedMovement = true;
-        peopleMtx.unlock();
+        try {
+            moving = true;
+            startedMovement = true;
+        }
+        finally {
+            peopleMtx.unlock();
+        }
     }
 
     public void stopMoving() {
         moving = false;
         peopleMtx.lock();
-        peopleCV.broadcast();
-        peopleMtx.unlock();
+        try {
+            peopleCV.broadcast();
+        }
+        finally {
+            peopleMtx.unlock();
+        }
     }
 
     public void move (int direction) {
@@ -164,8 +184,12 @@ public class Elevator {
 
     public  void clearRequest(int n) {
         requestsLock.lock();
-        requests[n] = null;
-        requestsLock.unlock();
+        try {
+            requests[n] = null;
+        }
+        finally {
+            requestsLock.unlock();
+        }
     }
 
     public Request[] getRequests() {

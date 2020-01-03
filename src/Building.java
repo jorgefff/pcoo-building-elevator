@@ -92,8 +92,12 @@ public class Building {
 
     public void callElevator() {
         idle.lock();
-        idleCV.broadcast();
-        idle.unlock();
+        try {
+            idleCV.broadcast();
+        }
+        finally {
+            idle.unlock();
+        }
     }
 
     /* **********************************************************************************************************
@@ -102,10 +106,14 @@ public class Building {
 
     public void idle() {
         idle.lock();
-        while (!pendingRequests()) {
-            idleCV.await();
+        try {
+            while (!pendingRequests()) {
+                idleCV.await();
+            }
         }
-        idle.unlock();
+        finally {
+            idle.unlock();
+        }
     }
 
     public boolean pendingRequests() {
