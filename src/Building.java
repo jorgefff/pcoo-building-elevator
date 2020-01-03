@@ -2,7 +2,7 @@ import pt.ua.concurrent.Mutex;
 import pt.ua.concurrent.MutexCV;
 
 
-public class Building {
+public class Building implements Building_Prsn, Building_Ctrl{
 
     protected boolean ELEVATOR_PRIORITY;
     protected int numFloors;
@@ -12,20 +12,19 @@ public class Building {
     protected Mutex idle;
     protected MutexCV idleCV;
 
-    public Building() {
-        this.ELEVATOR_PRIORITY = false;
-        this.idle = new Mutex(true);
-        this.idleCV = idle.newCV();
-    }
-
+    /**
+     * Constructor
+     * @param elePriority whether the controller gives priority to requests coming from elevator or just uses the oldest one
+     */
     public Building(boolean elePriority) {
         this.ELEVATOR_PRIORITY = elePriority;
         this.idle = new Mutex(true);
         this.idleCV = idle.newCV();
     }
 
-    /* **********************************************************************************************************
-     * Common methods
+    /**
+     * Initializes building floors
+     * @param n Number of floors
      */
     public void generateFloors(int n) {
         assert floors == null : "Floors already created";
@@ -38,6 +37,10 @@ public class Building {
         }
     }
 
+    /**
+     * Generates the building elevator
+     * @param capacity How many people fit inside the elevator at once
+     */
     public void generateElevator(int capacity) {
         assert elevator == null : "Elevator already created";
         assert floors != null : "Floors must be created first";
@@ -45,6 +48,10 @@ public class Building {
 
         elevator = new Elevator (this, capacity, numFloors);
     }
+
+    /* **********************************************************************************************************
+     * Common methods
+     */
 
     @Override
     public String toString() {
@@ -60,10 +67,19 @@ public class Building {
         return str.toString();
     }
 
+    /**
+     * Returns number of floors
+     * @return
+     */
     public int getNumFloors() {
         return numFloors;
     }
 
+    /**
+     * Returns a floor
+     * @param n Number of floor wanted
+     * @return
+     */
     public Floor getFloor(int n) {
         assert floors != null;
         assert n >= 0 && n < numFloors;
@@ -71,6 +87,10 @@ public class Building {
         return floors[n];
     }
 
+    /**
+     * Gets elevator instance
+     * @return
+     */
     public Elevator getElevator() {
         assert elevator != null;
 
@@ -81,15 +101,24 @@ public class Building {
      * Person methods
      */
 
-    public Floor enterFloor (Person p, int n) {
-        assert n >= 0 && n < numFloors;
+    /**
+     * Person enters a floor
+     * @param p Person must not be inside floor
+     * @return returns floor entered
+     */
+    public Floor enterFloor (Person p) {
         assert p != null;
-        assert !floors[n].contains(p);
+        assert p.start >= 0 && p.start < numFloors;
+        assert !floors[p.start].contains(p);
 
-        floors[n].enter(p);
-        return floors[n];
+        floors[p.start].enter(p);
+        return floors[p.start];
     }
 
+    /**
+     * Person called elevator on a floor
+     * Wakes up controller
+     */
     public void callElevator() {
         idle.lock();
         try {
@@ -104,6 +133,9 @@ public class Building {
      * ElevatorControl methods
      */
 
+    /**
+     * Controller has no pending requests, idles
+     */
     public void idle() {
         idle.lock();
         try {
@@ -116,6 +148,10 @@ public class Building {
         }
     }
 
+    /**
+     * Checks if there are pending requests from floors and elevator
+     * @return
+     */
     public boolean pendingRequests() {
         assert floors != null;
         assert elevator != null;
@@ -131,6 +167,11 @@ public class Building {
         return false;
     }
 
+    /**
+     * Checks if a floor requested the elevator
+     * @param n The floor to be checked
+     * @return
+     */
     public boolean isRequesting (int n) {
         assert n >= 0 && n < numFloors;
 
@@ -138,6 +179,11 @@ public class Building {
                 floors[n].calling != null;
     }
 
+    /**
+     * Returns the oldest {@link Request}
+     * Gives priority to elevator requests if set on the constructor
+     * @return
+     */
     public Request getNextDestination() {
         assert floors != null;
         assert elevator != null;
@@ -165,6 +211,10 @@ public class Building {
         return req;
     }
 
+    /**
+     * Clears the requests made for this floor coming from the floor and elevator
+     * @param n The floor
+     */
     public void clearRequests(int n) {
         assert n >= 0 && n < numFloors;
         assert floors != null;

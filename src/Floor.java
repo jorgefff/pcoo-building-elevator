@@ -19,8 +19,15 @@ public class Floor {
     protected final MutexCV waitingForElevator;
     protected final Mutex buttonMtx;
 
+    /**
+     * Constructor
+     * @param floorNum This floor's number
+     * @param building building instance this floor belongs to
+     */
     public Floor(int floorNum, Building building) {
         assert floorNum >= 0;
+        assert building != null;
+        assert floorNum < building.getNumFloors();
 
         this.building = building;
         this.floorNum = floorNum;
@@ -34,10 +41,18 @@ public class Floor {
         this.arriveMtx = new Mutex(true);
     }
 
+    /**
+     * Get this floor's number
+     * @return This floor's number
+     */
     public int getFloorNum() {
         return floorNum;
     }
 
+    /**
+     * Person enters the floor to queue for the elevator
+     * @param p person must not be inside already
+     */
     public void enter (Person p) {
         assert p != null;
         assert peopleIn != null;
@@ -51,10 +66,14 @@ public class Floor {
         finally {
             peopleMtx.unlock();
         }
-        
+
         assert peopleIn.contains(p);
     }
 
+    /**
+     * Person calls the elevator to its floor
+     * @param p Person needs to be in the floor
+     */
     public void callElevator (Person p) {
         assert p != null;
         assert peopleIn != null;
@@ -72,6 +91,11 @@ public class Floor {
         }
     }
 
+    /**
+     * Person queues for the elevator
+     * @param p Person needs to be in the floor
+     * @return Returns elevator instance and holds the door (needs to be released externally)
+     */
     public Elevator queueForElevator (Person p) {
         assert p != null;
         assert peopleIn != null;
@@ -86,18 +110,30 @@ public class Floor {
         return ele;
     }
 
+    /**
+     * Holds elevator door mutex
+     * Used to make transitions between floor and elevator
+     */
     public void grabElevatorDoor() {
         assert !elevatorDoorMtx.lockIsMine();
 
         elevatorDoorMtx.lock();
     }
 
+    /**
+     * Releases elevator door mutex
+     * Used to make transitions between floor and elevator
+     */
     public void releaseElevatorDoor() {
         assert elevatorDoorMtx.lockIsMine();
 
         elevatorDoorMtx.unlock();
     }
 
+    /**
+     * Person exits its starting floor
+     * @param p Person must be inside floor
+     */
     public void exit (Person p) {
         assert p != null;
         assert peopleIn != null;
@@ -115,6 +151,10 @@ public class Floor {
         assert !peopleIn.contains(p);
     }
 
+    /**
+     * Person arrived at its goal floor
+     * @param p Person must not be in arrival list
+     */
     public void arrive (Person p) {
         assert p != null;
         assert peopleOut != null;
@@ -132,26 +172,46 @@ public class Floor {
         assert peopleOut.contains(p);
     }
 
+    /**
+     * Number of people that arrived at this floor (as a goal)
+     * @return
+     */
     public int getArrivedCount() {
         assert peopleOut != null;
 
         return peopleOut.size();
     }
 
+    /**
+     * People currently in the floor waiting to enter elevator
+     * @return
+     */
     public int getOccupancy() {
         assert peopleIn != null;
 
         return peopleIn.size();
     }
 
+    /**
+     * Returns true if the person is in this floor
+     * @param p The person being checked
+     * @return
+     */
     public boolean contains(Person p) {
         return peopleIn.contains(p);
     }
 
+    /**
+     * Returns true if someone in this floor called the elevator
+     * @return
+     */
     public boolean isCalling() {
         return calling != null;
     }
 
+    /**
+     * Announces to every person waiting for the elevator that it arrived the floor
+     */
     public void openDoors() {
         elevatorDoorMtx.lock();
         try {
@@ -162,6 +222,9 @@ public class Floor {
         }
     }
 
+    /**
+     * Clears the requests for the elevator coming from this floor
+     */
     public void clearRequest() {
         buttonMtx.lock();
         try {
