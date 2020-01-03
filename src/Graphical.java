@@ -48,7 +48,8 @@ public class Graphical {
     }
 
 
-    public void setBuilding (Building building, int totalPeople, Color floorColor, Color elevColor) {
+
+    public void config(Building building, int totalPeople, Color floorColor, Color elevColor) {
         assert building != null;
         assert  ImageGelem.isImage("elevator.png");
 
