@@ -10,9 +10,11 @@ public class Floor {
 
     protected int floorNum;                 // Floor number
     protected Request calling;              // Floor called elevator
-    protected List<Person> people;          // List of people in this floor
+    protected List<Person> peopleIn;        // List of people waiting for elevator
+    protected List<Person> peopleOut;       // List of people that arrived
 
     protected final Mutex peopleMtx;
+    protected final Mutex arriveMtx;
     protected final Mutex elevatorDoorMtx;
     protected final MutexCV waitingForElevator;
     protected final Mutex buttonMtx;
@@ -23,11 +25,13 @@ public class Floor {
         this.building = building;
         this.floorNum = floorNum;
         this.calling = null;
-        this.people = new LinkedList<>();
+        this.peopleIn = new LinkedList<>();
+        this.peopleOut = new LinkedList<>();
         this.peopleMtx = new Mutex(true);
         this.elevatorDoorMtx = new Mutex(true);
         this.waitingForElevator = elevatorDoorMtx.newCV();
         this.buttonMtx = new Mutex(true);
+        this.arriveMtx = new Mutex(true);
     }
 
     public int getFloorNum() {
@@ -36,21 +40,21 @@ public class Floor {
 
     public void enter (Person p) {
         assert p != null;
-        assert people != null;
-        assert !people.contains(p);
+        assert peopleIn != null;
+        assert !peopleIn.contains(p);
 
         peopleMtx.lock();
-        people.add(p);
+        peopleIn.add(p);
         Graphical.getInstance().updateFloor(this);
         peopleMtx.unlock();
 
-        assert people.contains(p);
+        assert peopleIn.contains(p);
     }
 
     public void callElevator (Person p) {
         assert p != null;
-        assert people != null;
-        assert people.contains(p);
+        assert peopleIn != null;
+        assert peopleIn.contains(p);
 
         buttonMtx.lock();
         if (calling == null) {
@@ -62,8 +66,8 @@ public class Floor {
 
     public Elevator queueForElevator (Person p) {
         assert p != null;
-        assert people != null;
-        assert people.contains(p);
+        assert peopleIn != null;
+        assert peopleIn.contains(p);
 
         elevatorDoorMtx.lock();
         Elevator ele = building.getElevator();
@@ -88,25 +92,44 @@ public class Floor {
 
     public void exit (Person p) {
         assert p != null;
-        assert people != null;
-        assert people.contains(p);
+        assert peopleIn != null;
+        assert peopleIn.contains(p);
 
         peopleMtx.lock();
-        people.remove(p);
+        peopleIn.remove(p);
         Graphical.getInstance().updateFloor(this);
         peopleMtx.unlock();
 
-        assert !people.contains(p);
+        assert !peopleIn.contains(p);
+    }
+
+    public void arrive (Person p) {
+        assert p != null;
+        assert peopleOut != null;
+        assert !peopleOut.contains(p);
+
+        arriveMtx.lock();
+        peopleOut.add(p);
+        Graphical.getInstance().updateArrival(this);
+        arriveMtx.unlock();
+
+        assert peopleOut.contains(p);
+    }
+
+    public int getArrivedCount() {
+        assert peopleOut != null;
+
+        return peopleOut.size();
     }
 
     public int getOccupancy() {
-        assert people != null;
+        assert peopleIn != null;
 
-        return people.size();
+        return peopleIn.size();
     }
 
     public boolean contains(Person p) {
-        return people.contains(p);
+        return peopleIn.contains(p);
     }
 
     public boolean isCalling() {

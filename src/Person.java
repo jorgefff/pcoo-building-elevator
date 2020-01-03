@@ -61,7 +61,7 @@ public class Person extends Thread {
         elevator.enter(this);
         floor.releaseElevatorDoor();
         elevator.waitForFloor(this);
-
+        building.getFloor(goal).arrive(this);
         out.println("PERSON ARRIVED");
     }
 }

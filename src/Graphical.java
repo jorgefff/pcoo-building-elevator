@@ -14,14 +14,16 @@ public class Graphical {
     protected GBoard gboard;
     protected Building b;
     protected MutableStringGelem[] floors;
+    protected MutableStringGelem[] arrivals;
     protected MutableStringGelem elevTxt;
     protected ImageGelem elevImg;
 
     protected static final int NUM_LAYERS = 3;
     protected static final int IMG_LAYER = 1;
     protected static final int TXT_LAYER = 2;
-    protected static final int ELEV_X = 2;
     protected static final int FL_X = 1;
+    protected static final int ELEV_X = 2;
+    protected static final int ARRIV_X = 3;
     protected static int CELL_HEIGHT = 10;
     protected static final int CELL_WIDTH = 1;
     protected static int floorDigits;
@@ -30,6 +32,7 @@ public class Graphical {
     private Graphical () {
         b = null;
         floors = null;
+        arrivals = null;
         elevTxt = null;
         elevImg = null;
         gboard = null;
@@ -60,7 +63,7 @@ public class Graphical {
         // Building dimensions
         CELL_HEIGHT = b.getElevator().getMovementUnit();
         int bHeight = b.getNumFloors() * CELL_HEIGHT;
-        int bWidth = 4;
+        int bWidth = 5;
         gboard = new GBoard("Building elevator manager", bHeight, bWidth, NUM_LAYERS);
 
         // Set up floors occupancy text
@@ -68,8 +71,17 @@ public class Graphical {
         String flDefaultTxt = String.format("%0"+floorDigits+"d", 0);
         for (int i = 0; i < b.getNumFloors(); i++) {
             floors[i] = new MutableStringGelem(flDefaultTxt, floorColor, CELL_HEIGHT, 1);
-            int floorY = (b.getNumFloors()-1-i) * b.getElevator().getMovementUnit();
+            int floorY = (b.getNumFloors()-1-i) * CELL_HEIGHT;
             gboard.draw(floors[i], floorY, FL_X, TXT_LAYER);
+        }
+
+        // Set up arrivals text
+        arrivals = new MutableStringGelem[b.getNumFloors()];
+        String arrivalDefaultTxt = String.format("%0"+floorDigits+"d", 0);
+        for (int i = 0; i < b.getNumFloors(); i++) {
+            arrivals[i] = new MutableStringGelem(arrivalDefaultTxt, floorColor, CELL_HEIGHT, 1);
+            int floorY = (b.getNumFloors()-1-i) * CELL_HEIGHT;
+            gboard.draw(arrivals[i], floorY, ARRIV_X, TXT_LAYER);
         }
 
         // Set up elevator sprite and occupancy text
@@ -89,6 +101,14 @@ public class Graphical {
         int n = f.getFloorNum();
         String text = String.format("%0"+floorDigits+"d", f.getOccupancy());
         floors[n].setText(text);
+    }
+
+    public void updateArrival(Floor f) {
+        assert arrivals != null;
+
+        int n = f.getFloorNum();
+        String text = String.format("%0"+floorDigits+"d", f.getArrivedCount());
+        arrivals[n].setText(text);
     }
 
     public void updateElevatorPpl(Elevator e) {

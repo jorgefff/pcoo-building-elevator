@@ -3,6 +3,7 @@ import pt.ua.concurrent.MutexCV;
 
 
 public class Building {
+
     protected boolean ELEVATOR_PRIORITY;
     protected int numFloors;
     protected Floor[] floors;
@@ -16,6 +17,7 @@ public class Building {
         this.idle = new Mutex(true);
         this.idleCV = idle.newCV();
     }
+
     public Building(boolean elePriority) {
         this.ELEVATOR_PRIORITY = elePriority;
         this.idle = new Mutex(true);

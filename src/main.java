@@ -7,14 +7,14 @@ import static java.lang.System.*;
 
 public class main {
 
-    private static final int MAX_THREADS = 20;
-    private static final int NUM_FLOORS = 10;
+    private static final int MAX_THREADS = 20;  // Max number of concurrent threads
+    private static final int NUM_FLOORS = 10;   // Number of floors in the building
     private static final int ELEVATOR_CAPACITY = 4;
     private static final int NUM_PEOPLE = 50;
-    private static final long CTRL_PAUSE = 50;
-    private static final boolean ELEV_PRIORITY = true;
-    private static final Color FLOOR_COLOR = Color.black;
-    private static final Color ELEV_COLOR = Color.green;
+    private static final long CTRL_PAUSE = 50;              // Time the elevator controller pauses
+    private static final boolean ELEV_PRIORITY = true;      // Elevator requests have higher priority
+    private static final Color FLOOR_COLOR = Color.black;   // Floor occupancy text color
+    private static final Color ELEV_COLOR = Color.green;    // Elevator occupancy text color
 
 
     public static void main(String[] args) {
