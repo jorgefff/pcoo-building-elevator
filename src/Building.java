@@ -77,7 +77,7 @@ public class Building implements Building_Prsn, Building_Ctrl{
 
     /**
      * Returns a floor
-     * @param n Number of floor wanted
+     * @param n Floor wanted
      * @return
      */
     public Floor getFloor(int n) {
