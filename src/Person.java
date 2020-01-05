@@ -25,7 +25,7 @@ public class Person extends Thread {
 
     @Override
     public String toString() {
-        return "PERSON-START( "+start+" )-GOAL( "+goal+" )";
+        return "PERSON-START( "+start+" )->GOAL( "+goal+" )";
     }
 
     private int randFloor (int max) {
@@ -48,6 +48,7 @@ public class Person extends Thread {
 
     @Override
     public void run() {
+        assert start != goal;
         randStartSleep();
         out.println(this);
 
