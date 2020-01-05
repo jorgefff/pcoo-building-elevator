@@ -9,11 +9,11 @@ public class main {
 
     private static boolean graphicalMode = true;
 
-    private static int PPL_THREADS = 20;  // Threads used for people
+    private static int PPL_THREADS = 10;  // Threads used for people
     private static int NUM_FLOORS = 10;   // Number of floors in the building
     private static int ELEVATOR_CAPACITY = 4;
     private static int NUM_PEOPLE = 50;
-    private static long CTRL_PAUSE = 50;              // Time the elevator controller pauses
+    private static long CTRL_PAUSE = 30;              // Time the elevator controller pauses
     private static boolean ELEV_PRIORITY = true;      // Elevator requests have higher priority
     private static final Color FLOOR_COLOR = Color.black;   // Floor occupancy text color
     private static final Color ELEV_COLOR = Color.green;    // Elevator occupancy text color

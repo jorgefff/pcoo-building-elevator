@@ -49,6 +49,7 @@ public class Person extends Thread {
     @Override
     public void run() {
         assert start != goal;
+
         randStartSleep();
         out.println(this);
 

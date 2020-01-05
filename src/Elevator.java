@@ -24,7 +24,7 @@ public class Elevator implements Elevator_Prsn, Elevator_Ctrl {
     protected Mutex requestsLock;
 
     public Elevator (Building building, int capacity, int numFloors) {
-        assert capacity > 0;
+        assert capacity > 0 : "Invalid elevator capacity";
 
         this.startedMovement = false;
         this.building = building;
@@ -119,11 +119,11 @@ public class Elevator implements Elevator_Prsn, Elevator_Ctrl {
      * @param p The person entering must not already be inside
      */
     public void enter (Person p) {
-        assert p != null;
-        assert !moving;
-        assert isAtFloor(p.start);
-        assert !people.contains(p);
-        assert people.size() < capacity;
+        assert p != null : "Person is null";
+        assert !moving : "Cannot enter while moving";
+        assert isAtFloor(p.start) : "Person is not at current floor";
+        assert !people.contains(p) : "Person is already inside";
+        assert people.size() < capacity : "Elevator is full";
 
         peopleMtx.lock();
         try {
@@ -143,8 +143,8 @@ public class Elevator implements Elevator_Prsn, Elevator_Ctrl {
      * @param p The person must already be inside
      */
     public void waitForFloor (Person p) {
-        assert p != null;
-        assert  people.contains(p);
+        assert p != null : "Person is null";
+        assert people.contains(p) : "Person is not inside elevator";
 
         peopleMtx.lock();
         try {
@@ -165,9 +165,8 @@ public class Elevator implements Elevator_Prsn, Elevator_Ctrl {
      * @param p The person must be inside the elevator
      */
     public void pressButton (Person p) {
-        assert p != null;
-        assert people != null;
-        assert people.contains(p);
+        assert p != null : "Person is null";
+        assert people.contains(p) : "Person is not inside elevator";
 
         requestsLock.lock();
         try {
@@ -236,10 +235,10 @@ public class Elevator implements Elevator_Prsn, Elevator_Ctrl {
      * @param direction Elevator goes up if direction is positive, down if it is negative
      */
     public void move (int direction) {
-        assert moving;
-        assert direction == -1 || direction == 1;
-        assert (MOVE_UNIT * direction) + pos >= 0;
-        assert (MOVE_UNIT * direction) + pos <= (numFloors-1) * UNIT;
+        assert moving : "Elevator needs to be in movement state";
+        assert direction == -1 || direction == 1 : "Invalid direction";
+        assert (MOVE_UNIT * direction) + pos >= 0 : "Elevator is at bottom tyring to go down";
+        assert (MOVE_UNIT * direction) + pos <= (numFloors-1) * UNIT : "Elevator is at top trying to go up";
 
         startedMovement = false;
         int oldPos = pos;
@@ -267,7 +266,7 @@ public class Elevator implements Elevator_Prsn, Elevator_Ctrl {
      * @return
      */
     public Request[] getRequests() {
-        assert requests != null;
+        assert requests != null : "Requests not initialized";
 
         return requests;
     }

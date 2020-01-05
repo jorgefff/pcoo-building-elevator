@@ -25,9 +25,9 @@ public class Floor {
      * @param building building instance this floor belongs to
      */
     public Floor(int floorNum, Building building) {
-        assert floorNum >= 0;
-        assert building != null;
-        assert floorNum < building.getNumFloors();
+        assert floorNum >= 0 : "Invalid floor number";
+        assert building != null : "Building is null";
+        assert floorNum < building.getNumFloors() : "Invalid floor number";
 
         this.building = building;
         this.floorNum = floorNum;
@@ -54,9 +54,9 @@ public class Floor {
      * @param p person must not be inside already
      */
     public void enter (Person p) {
-        assert p != null;
-        assert peopleIn != null;
-        assert !peopleIn.contains(p);
+        assert p != null : "Person is null";
+        assert peopleIn != null : "People list is null";
+        assert !peopleIn.contains(p) : "Person is already inside";
 
         peopleMtx.lock();
         try {
@@ -75,9 +75,9 @@ public class Floor {
      * @param p Person needs to be in the floor
      */
     public void callElevator (Person p) {
-        assert p != null;
-        assert peopleIn != null;
-        assert peopleIn.contains(p);
+        assert p != null : "Person is null";
+        assert peopleIn != null : "People list is null";
+        assert peopleIn.contains(p) : "Person is not in this floor";
 
         buttonMtx.lock();
         try {
@@ -97,9 +97,9 @@ public class Floor {
      * @return Returns elevator instance and holds the door (needs to be released externally)
      */
     public Elevator queueForElevator (Person p) {
-        assert p != null;
-        assert peopleIn != null;
-        assert peopleIn.contains(p);
+        assert p != null : "Person is null";
+        assert peopleIn != null : "People list is null";
+        assert peopleIn.contains(p) : "Person is not in this floor";
 
         elevatorDoorMtx.lock();
         Elevator ele = building.getElevator();
@@ -115,7 +115,7 @@ public class Floor {
      * Used to make transitions between floor and elevator
      */
     public void grabElevatorDoor() {
-        assert !elevatorDoorMtx.lockIsMine();
+        assert !elevatorDoorMtx.lockIsMine() : "You do not hold the lock";
 
         elevatorDoorMtx.lock();
     }
@@ -125,7 +125,7 @@ public class Floor {
      * Used to make transitions between floor and elevator
      */
     public void releaseElevatorDoor() {
-        assert elevatorDoorMtx.lockIsMine();
+        assert elevatorDoorMtx.lockIsMine() : "You do not hold the lock";
 
         elevatorDoorMtx.unlock();
     }
@@ -135,9 +135,9 @@ public class Floor {
      * @param p Person must be inside floor
      */
     public void exit (Person p) {
-        assert p != null;
-        assert peopleIn != null;
-        assert peopleIn.contains(p);
+        assert p != null : "Person is null";
+        assert peopleIn != null : "People list is null";
+        assert peopleIn.contains(p) : "Person is not in this floor";
 
         peopleMtx.lock();
         try {
@@ -156,9 +156,9 @@ public class Floor {
      * @param p Person must not be in arrival list
      */
     public void arrive (Person p) {
-        assert p != null;
-        assert peopleOut != null;
-        assert !peopleOut.contains(p);
+        assert p != null : "Person is null";
+        assert peopleOut != null : "Arrivals list is null";
+        assert !peopleOut.contains(p) : "Person is already in the arrivals list";
 
         arriveMtx.lock();
         try {
@@ -177,7 +177,7 @@ public class Floor {
      * @return
      */
     public int getArrivedCount() {
-        assert peopleOut != null;
+        assert peopleOut != null : "Arrivals list is null";
 
         return peopleOut.size();
     }
@@ -187,7 +187,7 @@ public class Floor {
      * @return
      */
     public int getOccupancy() {
-        assert peopleIn != null;
+        assert peopleIn != null : "People list is null";
 
         return peopleIn.size();
     }

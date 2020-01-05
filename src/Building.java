@@ -81,8 +81,8 @@ public class Building implements Building_Prsn, Building_Ctrl{
      * @return
      */
     public Floor getFloor(int n) {
-        assert floors != null;
-        assert n >= 0 && n < numFloors;
+        assert floors != null : "Floors were not generated";
+        assert n >= 0 && n < numFloors : "Invalid floor number";
 
         return floors[n];
     }
@@ -92,7 +92,7 @@ public class Building implements Building_Prsn, Building_Ctrl{
      * @return
      */
     public Elevator getElevator() {
-        assert elevator != null;
+        assert elevator != null : "Elevator was not generated";
 
         return elevator;
     }
@@ -107,9 +107,9 @@ public class Building implements Building_Prsn, Building_Ctrl{
      * @return returns floor entered
      */
     public Floor enterFloor (Person p) {
-        assert p != null;
-        assert p.start >= 0 && p.start < numFloors;
-        assert !floors[p.start].contains(p);
+        assert p != null : "Invalid person";
+        assert p.start >= 0 && p.start < numFloors : "Invalid floor start";
+        assert !floors[p.start].contains(p) : "Person is already in this floor";
 
         floors[p.start].enter(p);
         return floors[p.start];
@@ -153,8 +153,8 @@ public class Building implements Building_Prsn, Building_Ctrl{
      * @return
      */
     public boolean pendingRequests() {
-        assert floors != null;
-        assert elevator != null;
+        assert floors != null : "Floors were not generated";
+        assert elevator != null : "Elevator was not generated";
 
         for (Floor f: floors) {
             if (f.isCalling()) { return true; }
@@ -173,7 +173,7 @@ public class Building implements Building_Prsn, Building_Ctrl{
      * @return
      */
     public boolean isRequesting (int n) {
-        assert n >= 0 && n < numFloors;
+        assert n >= 0 && n < numFloors : "Invalid floor number";
 
         return  elevator.getRequests()[n] != null ||
                 floors[n].calling != null;
@@ -185,8 +185,8 @@ public class Building implements Building_Prsn, Building_Ctrl{
      * @return
      */
     public Request getNextDestination() {
-        assert floors != null;
-        assert elevator != null;
+        assert floors != null : "Floors were not generated";
+        assert elevator != null : "Elevator was not generated";
 
         Request req = null;
 
@@ -216,9 +216,9 @@ public class Building implements Building_Prsn, Building_Ctrl{
      * @param n The floor
      */
     public void clearRequests(int n) {
-        assert n >= 0 && n < numFloors;
-        assert floors != null;
-        assert elevator != null;
+        assert n >= 0 && n < numFloors : "Invalid floor number";
+        assert floors != null : "Floors were not generated";
+        assert elevator != null : "Elevator was not generated";
 
         floors[n].clearRequest();
         elevator.clearRequest(n);
